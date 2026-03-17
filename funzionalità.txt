@@ -1,0 +1,67 @@
+1. Possibiltà di aprire dalla dashboard le card: valore inventario, prodotti attivi, quarantena e allarmi scorte;
+2. Attivare pulsante visualizza tutti i lotti a rischio;
+3. Creare una scheda fornitori più approfondita;
+4. Creare profilo utente / inserire cambio email e pass;
+
+
+backend/
+├── requirements.txt          # Tutte le dipendenze (Django, DRF, JWT, OpenAI, ecc.) 
+├── .env                      # Variabili d'ambiente (Credenziali DB, SECRET_KEY, API Keys AI)
+├── manage.py
+│
+├── config/                   # IL MOTORE CENTRALE
+│   ├── settings.py           # Configurazione DB, registrazione delle app sottostanti
+│   ├── urls.py               # Router globale (include le rotte di tutte le app)
+│   ├── wsgi.py / asgi.py
+│
+├── core/                     # UTILITY CONDIVISE (Non è un'app in DB, ma puro codice Python)
+│   ├── permissions.py        # Regole RBAC: IsAdmin, IsWarehouseWorker (Requisito Sicurezza API)
+│   ├── exceptions.py         # Formattazione standard degli errori per il tuo Frontend
+│   └── pagination.py         # Regole di paginazione per non far crashare le tabelle
+│
+├── users/                    # APP 1: AUTENTICAZIONE E AUTORIZZAZIONE (Requisito)
+│   ├── models.py             # CustomUser (con i flag is_admin, is_warehouse_worker)
+│   ├── serializers.py
+│   ├── views.py              # Endpoint di Login (JWT) e gestione profili
+│   └── urls.py               # /api/users/, /api/auth/
+│
+├── categorie/                # APP 2: GESTIONE CATEGORIE (Requisito)
+│   ├── models.py             # Modello Category
+│   ├── serializers.py
+│   ├── views.py              # ViewSet CRUD Categorie
+│   └── urls.py               # /api/categories/
+│
+├── fornitori/                # APP 3: GESTIONE FORNITORI (Requisito)
+│   ├── models.py             # Modello Supplier (Nome, contatti)
+│   ├── serializers.py
+│   ├── views.py              # ViewSet CRUD Fornitori (con associazione prodotti)
+│   └── urls.py               # /api/suppliers/
+│
+├── prodotti/                 # APP 4: GESTIONE PRODOTTI E LOTTI (Requisito)
+│   ├── models.py             # Modelli Product (SKU, soglia minima) e ProductLot (Scadenze)
+│   ├── serializers.py        # ProductSerializer
+│   ├── filters.py            # Logica per cercare per nome, SKU, categoria (Requisito)
+│   ├── views.py              # ViewSet CRUD Prodotti
+│   └── urls.py               # /api/products/
+│
+├── movimenti/                # APP 5: MOVIMENTI DI MAGAZZINO (Requisito)
+│   ├── models.py             # Modello StockMovement (IN/OUT, data, note, utente)
+│   ├── serializers.py        # Logica transazionale (aggiornamento automatico scorte al salvataggio)
+│   ├── filters.py            # Logica per filtrare storico per prodotto, tipo e periodo (Requisito)
+│   ├── views.py              # Endpoint registrazione e storico movimenti
+│   └── urls.py               # /api/movements/
+│
+├── alert_report/             # APP 6: ALERT E MONITORAGGIO (Requisito Obbligatorio)
+│   ├── services.py           # Logica complessa: calcola la giacenza vera sommando tutti i lotti attivi
+│   ├── views.py              # "Endpoint dedicato che restituisca l'elenco dei prodotti sotto soglia"
+│   └── urls.py               # /api/alerts/low-stock/, /api/reports/inventory-value/
+│
+└── ai_services/              # APP 7: INTEGRAZIONE AI (Requisito Obbligatorio + Bonus Multi-Provider)
+    ├── providers/            # Pattern Architetturale per il Bonus Multi-Provider
+    │   ├── base.py           # Interfaccia base astratta
+    │   ├── gemini.py         # Logica di connessione alle API di Google Gemini
+    │   └── openai.py         # Logica di connessione alle API di OpenAI
+    ├── prompts.py            # Il file di Sabrina: contiene i testi dei prompt contestualizzati
+    ├── services.py           # Raccoglie i dati dal DB (storico, anomalie) per iniettarli nel prompt
+    ├── views.py              # Endpoint per invocare l'AI (es. genera report, chat assistente)
+    └── urls.py               # /api/ai/generate-report/, /api/ai/chat/
