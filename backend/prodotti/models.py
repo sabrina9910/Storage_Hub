@@ -14,7 +14,7 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='products')
     suppliers = models.ManyToManyField(Supplier, related_name='products')
     sku = models.CharField(max_length=100, unique=True)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=256)
     description = models.TextField(blank=True)
     unit_of_measure = models.CharField(max_length=50) # kg, pcs, etc.
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
