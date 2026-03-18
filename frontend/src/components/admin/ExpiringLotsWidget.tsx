@@ -99,7 +99,7 @@ export default function ExpiringLotsWidget({ lots }: { lots: any[] }) {
             })
           )}
         </div>
-        
+
         {expiringLots.length > 0 && (
           <div className="p-4 border-t border-white/40 bg-white/30 backdrop-blur-md">
             <button className="w-full py-3 bg-white border border-slate-200 text-sm font-bold text-slate-700 rounded-xl hover:text-primary hover:border-primary/50 hover:shadow-sm transition-all flex items-center justify-center gap-2 group">
@@ -107,6 +107,6 @@ export default function ExpiringLotsWidget({ lots }: { lots: any[] }) {
             </button>
           </div>
         )}
-      </div>
-    );
-  }
+    </div>
+  );
+}
