@@ -18,8 +18,11 @@ export default function Login() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       setIsLoading(true);
-      await apiServices.login(data);
-
+      const res = await apiServices.login(data);
+      localStorage.setItem('access_token', res.access);
+      if (res.refresh) {
+        localStorage.setItem('refresh_token', res.refresh);
+      }
       const user = await apiServices.getCurrentUser();
 
       toast.success('Accesso effettuato');
