@@ -1,0 +1,85 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+// Layouts
+import AdminLayout from './components/layout/AdminLayout';
+
+// Pages
+import Login from './pages/Login';
+import DashboardAdmin from './pages/admin/DashboardAdmin';
+import ProductCatalog from './pages/admin/ProductCatalog';
+import CategoryManager from './pages/admin/CategoryManager';
+import SupplierManager from './pages/admin/SupplierManager';
+import MovementLogs from './pages/admin/MovementLogs';
+import UserProfile from './pages/admin/UserProfile';
+import WorkerDashboard from './pages/worker/WorkerDashboard';
+import DesktopMovementWizard from './pages/worker/DesktopMovementWizard';
+import ProtectedRoute from './components/ProtectedRoute';
+import { Toaster } from 'react-hot-toast';
+
+const queryClient = new QueryClient();
+
+// Placeholder for System Logs (God Mode)
+const SystemLogs = () => <div className="p-8 text-slate-800"><h1 className="text-2xl font-bold mb-4">System Config & Logs</h1><p>Raw system operational logs will be displayed here.</p></div>;
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<Login />} />
+          
+          {/* Main Unified Container */}
+          <Route element={<ProtectedRoute />}>
+            <Route element={<AdminLayout />}>
+              <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="/worker" element={<Navigate to="/worker/dashboard" replace />} />
+              
+              {/* Unified Inventory Routes (Admin + Worker) */}
+              <Route element={<ProtectedRoute requiredRole="worker" />}>
+                <Route path="/admin/products" element={<ProductCatalog />} />
+                <Route path="/admin/categories" element={<CategoryManager />} />
+                <Route path="/admin/suppliers" element={<SupplierManager />} />
+                <Route path="/admin/inventory" element={<MovementLogs />} />
+                <Route path="/admin/profile" element={<UserProfile />} />
+                
+                {/* Keep old worker routes functional for backward compatibility if needed, or redirect them */}
+                <Route path="/worker/dashboard" element={<WorkerDashboard />} />
+                <Route path="/worker/movement" element={<DesktopMovementWizard />} />
+              </Route>
+
+              {/* Strict Admin Routes */}
+              <Route element={<ProtectedRoute requiredRole="admin" />}>
+                <Route path="/admin/dashboard" element={<DashboardAdmin />} />
+              </Route>
+              
+              {/* God Mode Route */}
+              <Route element={<ProtectedRoute requiredRole="superuser" />}>
+                <Route path="/admin/system" element={<SystemLogs />} />
+              </Route>
+            </Route>
+          </Route>
+        </Routes>
+        
+        {/* Global Toaster for API Feedback */}
+        <Toaster 
+          position="top-center"
+          toastOptions={{
+            className: 'glass text-dark-text font-medium',
+            duration: 4000,
+            style: {
+              background: 'rgba(255, 255, 255, 0.9)',
+              color: '#0f172a',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            },
+          }}
+        />
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+}
+
+export default App;
