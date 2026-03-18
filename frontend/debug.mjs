@@ -1,0 +1,17 @@
+import puppeteer from 'puppeteer';
+(async () => {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  page.on('console', msg => console.log('LOG:', msg.text()));
+  page.on('pageerror', err => console.log('ERROR:', err.toString()));
+  await page.goto('http://localhost:5173/login');
+  await page.type('input[type="email"]', 'worker@example.com');
+  await page.type('input[type="password"]', 'password123');
+  await page.click('button[type="submit"]');
+  await page.waitForNavigation();
+  await page.goto('http://localhost:5173/worker/movements');
+  await new Promise(r => setTimeout(r, 2000));
+  await page.click('button:has-text("Prodotto")').catch(e => console.log('Click failed', e.message));
+  await new Promise(r => setTimeout(r, 1000));
+  await browser.close();
+})();
