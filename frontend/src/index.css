@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0ea5e9;
+  --color-primary-dark: #0284c7;
+  --color-secondary: #f8fafc;
+  --color-accent: #10b981;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  --color-dark-text: #0f172a;
+
+  --color-glass-bg: rgba(255, 255, 255, 0.6);
+  --color-glass-border: rgba(255, 255, 255, 1);
+
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: #f8fafc;
+    background-image: 
+        radial-gradient(at 40% 20%, hsla(210, 100%, 93%, 1) 0px, transparent 50%),
+        radial-gradient(at 80% 0%, hsla(189, 100%, 90%, 1) 0px, transparent 50%),
+        radial-gradient(at 0% 50%, hsla(240, 100%, 96%, 1) 0px, transparent 50%),
+        radial-gradient(at 80% 50%, hsla(260, 100%, 95%, 1) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, hsla(260, 100%, 95%, 1) 0px, transparent 50%);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+    color: var(--color-dark-text);
+  }
+}
+
+@layer utilities {
+  .glass {
+    background-color: var(--color-glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--color-glass-border);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  }
+  
+  .glass-dark {
+    background-color: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  }
+  
+  .glass-card {
+    background-color: var(--color-glass-bg);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--color-glass-border);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+    border-radius: 1.5rem; /* rounded-3xl */
+  }
+}
