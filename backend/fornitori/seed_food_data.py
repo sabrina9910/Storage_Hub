@@ -7,7 +7,11 @@ from django.utils import timezone
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
-from core.models import User, Supplier, Category, Product, ProductLot, StockMovement
+from users.models import User  # o CustomUser, a seconda di come l'avete chiamato
+from fornitori.models import Supplier
+from categorie.models import Category
+from prodotti.models import Product, ProductLot
+from movimenti.models import StockMovement
 
 def run():
     print("Clearing old data...")

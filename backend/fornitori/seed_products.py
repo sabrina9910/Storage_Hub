@@ -4,7 +4,11 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
-from core.models import Product, ProductLot, Category
+from users.models import User  # o CustomUser, a seconda di come l'avete chiamato
+from fornitori.models import Supplier
+from categorie.models import Category
+from prodotti.models import Product, ProductLot
+from movimenti.models import StockMovement
 from datetime import date, timedelta
 
 cat, _ = Category.objects.get_or_create(name='Elettronica')
