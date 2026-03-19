@@ -1,29 +1,27 @@
 from rest_framework import permissions
 
-class IsManagerOrSuperuser(permissions.BasePermission):
+class IsAmministratore(permissions.BasePermission):
     """
-    Consente l'accesso solo al Manager (is_admin=True) 
-    o al Programmatore (is_superuser=True).
+    Consente l'accesso solo all'Amministratore.
     """
     def has_permission(self, request, view):
         user = request.user
-        return user and user.is_authenticated and (getattr(user, 'is_admin', False) or getattr(user, 'is_superuser', False))
+        return user and user.is_authenticated and (getattr(user, 'role', '') == 'amministratore' or getattr(user, 'is_superuser', False))
 
-class IsInventoryWorker(permissions.BasePermission):
+class IsMagazziniere(permissions.BasePermission):
     """
     Consente l'accesso in scrittura e lettura a chiunque faccia parte
     del team di gestione magazzino:
-    - Magazziniere (is_warehouse_worker=True)
-    - Manager (is_admin=True)
-    - Programmatore (is_superuser=True)
+    - Magazziniere
+    - Amministratore
     """
     def has_permission(self, request, view):
         user = request.user
         if not user or not user.is_authenticated:
             return False
             
+        role = getattr(user, 'role', '')
         return (
-            getattr(user, 'is_warehouse_worker', False) or
-            getattr(user, 'is_admin', False) or
+            role in ['magazziniere', 'amministratore'] or
             getattr(user, 'is_superuser', False)
         )

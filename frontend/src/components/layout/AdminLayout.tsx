@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { LayoutDashboard, Package, ArrowLeftRight, Users, LogOut, Search, Menu, X, Terminal, Tags, UserCircle } from 'lucide-react';
+import { LayoutDashboard, PackageSearch, ArrowLeftRight, Users, LogOut, Search, Menu, X, Terminal, Tags, UserCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { apiServices } from '@/lib/api';
 
@@ -40,11 +40,11 @@ export default function AdminLayout() {
   const navItems = [];
   
   // Base items for everyone who is at least a worker
-  if (currentUser?.is_warehouse_worker || currentUser?.is_admin || currentUser?.is_superuser) {
-    if (currentUser?.is_warehouse_worker && !currentUser?.is_admin && !currentUser?.is_superuser) {
+  if (currentUser?.role === 'magazziniere' || currentUser?.role === 'amministratore' || currentUser?.is_superuser) {
+    if (currentUser?.role === 'magazziniere' && !currentUser?.is_superuser) {
         navItems.push(
-            { name: 'My Workspace', to: '/worker/dashboard', icon: LayoutDashboard },
-            { name: 'Wizard Movimenti', to: '/worker/movement', icon: ArrowLeftRight }
+            { name: 'My Workspace', to: '/magazziniere/dashboard', icon: LayoutDashboard },
+            { name: 'Wizard Movimenti', to: '/magazziniere/movement', icon: ArrowLeftRight }
         );
     } else {
         navItems.push(
@@ -54,7 +54,7 @@ export default function AdminLayout() {
 
     // Shared inventory management items
     navItems.push(
-      { name: 'Catalogo', to: '/admin/products', icon: Package },
+      { name: 'Prodotti e Cataloghi', to: '/admin/products', icon: PackageSearch },
       { name: 'Categorie', to: '/admin/categories', icon: Tags },
       { name: 'Registro Mov.', to: '/admin/inventory', icon: ArrowLeftRight },
       { name: 'Fornitori', to: '/admin/suppliers', icon: Users }
@@ -175,7 +175,7 @@ export default function AdminLayout() {
                   {currentUser?.email ? currentUser.email.split('@')[0] : 'Utente'}
                 </p>
                 <p className="text-xs text-slate-500 font-medium uppercase tracking-widest">
-                  {currentUser?.is_superuser ? 'Superuser' : currentUser?.is_warehouse_worker ? 'Worker' : 'Admin'}
+                  {currentUser?.is_superuser ? 'Superuser' : currentUser?.role === 'magazziniere' ? 'Magazziniere' : 'Amministratore'}
                 </p>
               </div>
               <div className="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold border-2 border-white shadow-md uppercase group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all relative">

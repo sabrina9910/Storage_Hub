@@ -16,25 +16,34 @@ users_to_create = [
     {
         'email': 'test@test.com',
         'password': 'test1234',
+        'first_name': 'Super',
+        'last_name': 'Mario',
+        'phone': '+39 333 1234567',
+        'contract_type': 'Indeterminato',
         'is_superuser': True,
-        'is_admin': True,
-        'is_warehouse_worker': True,
+        'role': 'amministratore',
         'label': 'Superuser',
     },
     {
         'email': 'manager@test.com',
         'password': 'managerpassword',
+        'first_name': 'Giulia',
+        'last_name': 'Amministratrice',
+        'phone': '+39 333 7654321',
+        'contract_type': 'Indeterminato',
         'is_superuser': False,
-        'is_admin': True,
-        'is_warehouse_worker': False,
+        'role': 'amministratore',
         'label': 'Manager/Admin',
     },
     {
         'email': 'worker@test.com',
         'password': 'workerpassword',
+        'first_name': 'Luigi',
+        'last_name': 'Verdi',
+        'phone': '+39 333 9876543',
+        'contract_type': 'Determinato',
         'is_superuser': False,
-        'is_admin': False,
-        'is_warehouse_worker': True,
+        'role': 'magazziniere',
         'label': 'Worker',
     },
 ]
@@ -55,7 +64,7 @@ for u in users_to_create:
 
     action = "✅ Creato" if created else "🔄 Aggiornato"
     print(f"{action} [{label}]: {email} / {password}")
-    print(f"   is_superuser={user.is_superuser}, is_admin={user.is_admin}, is_warehouse_worker={user.is_warehouse_worker}")
+    print(f"   is_superuser={user.is_superuser}, role={user.role}")
     print()
 
 print("=== Setup completato! ===")

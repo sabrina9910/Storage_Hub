@@ -13,22 +13,19 @@ class Command(BaseCommand):
             {
                 'email': 'admin@example.com',
                 'password': 'password123',
-                'is_admin': True,
-                'is_warehouse_worker': False,
+                'role': 'amministratore',
                 'role_name': 'Admin'
             },
             {
                 'email': 'worker@example.com',
                 'password': 'password123',
-                'is_admin': False,
-                'is_warehouse_worker': True,
+                'role': 'magazziniere',
                 'role_name': 'Worker'
             },
             {
                 'email': 'manager@example.com',
                 'password': 'password123',
-                'is_admin': False,
-                'is_warehouse_worker': False,
+                'role': 'amministratore',
                 'role_name': 'Manager'
             }
         ]
@@ -40,8 +37,9 @@ class Command(BaseCommand):
                     email=email,
                     password=data['password']
                 )
-                user.is_admin = data['is_admin']
-                user.is_warehouse_worker = data['is_warehouse_worker']
+                user.role = data['role']
+                if data['role_name'] == 'Admin':
+                    user.is_superuser = True
                 user.save()
                 self.stdout.write(self.style.SUCCESS(f'Successfully created {data["role_name"]} user: {email}'))
             else:

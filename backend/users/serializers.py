@@ -7,7 +7,11 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'is_admin', 'is_warehouse_worker', 'is_superuser']
+        fields = [
+            'id', 'email', 'role', 'is_superuser',
+            'first_name', 'last_name', 'avatar',
+            'birth_date', 'hire_date', 'contract_type', 'phone'
+        ]
 
 class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
     username_field = 'email'

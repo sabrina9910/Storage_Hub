@@ -14,6 +14,7 @@ import MovementLogs from './pages/admin/MovementLogs';
 import UserProfile from './pages/admin/UserProfile';
 import WorkerDashboard from './pages/worker/WorkerDashboard';
 import DesktopMovementWizard from './pages/worker/DesktopMovementWizard';
+import UsersManagement from './pages/admin/UsersManagement';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
 
@@ -43,10 +44,10 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<AdminLayout />}>
               <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-              <Route path="/worker" element={<Navigate to="/worker/dashboard" replace />} />
+              <Route path="/magazziniere" element={<Navigate to="/magazziniere/dashboard" replace />} />
               
               {/* Unified Inventory Routes (Admin + Worker) */}
-              <Route element={<ProtectedRoute requiredRole="worker" />}>
+              <Route element={<ProtectedRoute requiredRole="magazziniere" />}>
                 <Route path="/admin/products" element={<ProductCatalog />} />
                 <Route path="/admin/categories" element={<CategoryManager />} />
                 <Route path="/admin/suppliers" element={<SupplierManager />} />
@@ -55,15 +56,16 @@ function App() {
                 <Route path="/admin/search" element={<GlobalSearch />} />
                 
                 {/* Keep old worker routes functional for backward compatibility if needed, or redirect them */}
-                <Route path="/worker/dashboard" element={<WorkerDashboard />} />
-                <Route path="/worker/movement" element={<DesktopMovementWizard />} />
+                <Route path="/magazziniere/dashboard" element={<WorkerDashboard />} />
+                <Route path="/magazziniere/movement" element={<DesktopMovementWizard />} />
               </Route>
 
               {/* Strict Admin Routes */}
-              <Route element={<ProtectedRoute requiredRole="admin" />}>
+              <Route element={<ProtectedRoute requiredRole="amministratore" />}>
                 <Route path="/admin/dashboard" element={<DashboardAdmin />} />
                 <Route path="/admin/active-products" element={<ActiveProductsList />} />
                 <Route path="/admin/quarantine" element={<QuarantineList />} />
+                <Route path="/admin/users" element={<UsersManagement />} />
                 <Route path="/admin/low-stock-alerts" element={<LowStockAlerts />} />
                 <Route path="/admin/inventory-value" element={<InventoryValue />} />
                 <Route path="/admin/at-risk-lots" element={<AtRiskLots />} />

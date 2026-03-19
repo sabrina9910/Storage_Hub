@@ -5,14 +5,14 @@ from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
 from django.db import transaction
 
-from core.permissions import IsInventoryWorker
+from core.permissions import IsMagazziniere
 from .models import StockMovement
 from .serializers import StockMovementSerializer
 from .filters import StockMovementFilter
 
 class StockMovementViewSet(viewsets.ModelViewSet):
     serializer_class = StockMovementSerializer
-    permission_classes = [IsInventoryWorker]
+    permission_classes = [IsMagazziniere]
     filterset_class = StockMovementFilter
 
     def get_queryset(self):

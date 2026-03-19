@@ -7,15 +7,20 @@ from django.db.models import Sum, Q
 from django.utils import timezone
 from datetime import timedelta
 
-from core.permissions import IsInventoryWorker
+from core.permissions import IsMagazziniere
 from .models import Product, ProductLot
 from .serializers import ProductSerializer, ProductLotSerializer
 from .filters import ProductFilter
 
 class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
-    permission_classes = [IsInventoryWorker]
     filterset_class = ProductFilter
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve', 'alerts']:
+            return [IsMagazziniere()]
+        from core.permissions import IsAmministratore
+        return [IsAmministratore()]
 
     def get_queryset(self):
         user = self.request.user
@@ -97,7 +102,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
 class ProductLotViewSet(viewsets.ModelViewSet):
     serializer_class = ProductLotSerializer
-    permission_classes = [IsInventoryWorker]
+    permission_classes = [IsMagazziniere]
 
     def get_queryset(self):
         user = self.request.user
