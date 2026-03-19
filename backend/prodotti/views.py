@@ -14,8 +14,13 @@ from .filters import ProductFilter
 
 class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
-    permission_classes = [IsMagazziniere]
     filterset_class = ProductFilter
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve', 'alerts']:
+            return [IsMagazziniere()]
+        from core.permissions import IsAmministratore
+        return [IsAmministratore()]
 
     def get_queryset(self):
         user = self.request.user

@@ -6,4 +6,8 @@ from .serializers import CategorySerializer
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [IsMagazziniere]
+    
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [IsMagazziniere()]
+        return [IsAmministratore()]

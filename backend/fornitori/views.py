@@ -5,7 +5,11 @@ from .serializers import SupplierSerializer
 
 class SupplierViewSet(viewsets.ModelViewSet):
     serializer_class = SupplierSerializer
-    permission_classes = [IsMagazziniere]
+    
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [IsMagazziniere()]
+        return [IsAmministratore()]
     
     def get_queryset(self):
         return Supplier.objects.filter(is_active=True)
