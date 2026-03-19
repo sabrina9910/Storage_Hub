@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiServices } from '@/lib/api';
 import { PackageOpen, Edit2, Layers, Trash2, CheckCircle2, ChevronDown, ChevronUp, Thermometer, Info, Plus } from 'lucide-react';
@@ -109,7 +110,9 @@ export default function ProductCatalog() {
                       </div>
                       <div className="col-span-3 flex flex-col justify-center">
                         <div className="font-bold text-slate-800 flex items-center gap-2 line-clamp-1" title={product.name}>
-                          {product.name}
+                          <Link to={`/admin/products/${product.id}`} onClick={(e) => e.stopPropagation()} className="hover:text-primary hover:underline transition-all">
+                            {product.name}
+                          </Link>
                           {!product.is_active && <span className="bg-rose-100 text-rose-600 text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider">Inattivo</span>}
                         </div>
                         <div className="flex items-center gap-2 mt-1">
@@ -131,6 +134,14 @@ export default function ProductCatalog() {
                         {product.totalQty}<span className="text-[10px] text-slate-400 ml-1 uppercase">{product.unit_of_measure}</span>
                       </div>
                       <div className="col-span-2 flex justify-end gap-2 pr-2">
+                        <Link
+                          to={`/admin/products/${product.id}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl transition-colors active:scale-95"
+                          title="Vedi Dettaglio"
+                        >
+                          <Info size={18} />
+                        </Link>
                         <button 
                           onClick={(e) => { e.stopPropagation(); setSelectedProduct(product); }}
                           className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl transition-colors active:scale-95"
