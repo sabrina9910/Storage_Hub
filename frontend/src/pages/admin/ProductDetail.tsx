@@ -1,11 +1,16 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Package, Clock, ShieldAlert, FileText, Layers, AlertCircle, TrendingDown, TrendingUp } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { apiServices } from '@/lib/api';
+import QuarantineModal from '@/components/admin/QuarantineModal';
 import { cn } from '@/lib/utils';
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
+  const [isQuarantineModalOpen, setIsQuarantineModalOpen] = useState(false);
 
   const { data: product, isLoading: pLoading, isError: pError } = useQuery({
     queryKey: ['product', id],
@@ -23,6 +28,24 @@ export default function ProductDetail() {
     queryKey: ['lots'],
     queryFn: apiServices.getLots,
   });
+
+  const quarantineMutation = useMutation({
+    mutationFn: (productId: string) => apiServices.quarantineProduct(productId),
+    onSuccess: () => {
+      setIsQuarantineModalOpen(false);
+      toast.success('Prodotto spostato in quarantena con successo!');
+      queryClient.invalidateQueries({ queryKey: ['product', id] });
+    },
+    onError: () => {
+      toast.error('Impossibile spostare in quarantena, riprova.');
+    }
+  });
+
+  const handleQuarantine = () => {
+    if (id) {
+      quarantineMutation.mutate(id);
+    }
+  };
 
   if (pLoading || mLoading || lLoading) {
     return (
@@ -86,7 +109,8 @@ export default function ProductDetail() {
              <div>
                <div className="flex items-center gap-3 mb-2">
                  <span className="px-3 py-1 bg-white/80 border border-slate-200 shadow-sm text-slate-600 text-[10px] font-black uppercase tracking-widest rounded-lg">{product.sku}</span>
-                 {!product.is_active && <span className="px-3 py-1 bg-rose-100/80 border border-rose-200 text-rose-700 text-[10px] font-black uppercase tracking-widest rounded-lg">Inattivo</span>}
+                 {product.status === 'QUARANTINE' && <span className="px-3 py-1 bg-rose-600 text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm animate-pulse">Quarantena</span>}
+                 {!product.is_active && product.status !== 'QUARANTINE' && <span className="px-3 py-1 bg-rose-100/80 border border-rose-200 text-rose-700 text-[10px] font-black uppercase tracking-widest rounded-lg">Inattivo</span>}
                </div>
                <h1 className="text-4xl lg:text-5xl font-black text-slate-800 tracking-tight">{product.name}</h1>
                <div className="flex flex-wrap items-center gap-5 mt-3 text-slate-600 font-medium text-sm">
@@ -255,15 +279,23 @@ export default function ProductDetail() {
                Blocca la movimentazione di questo prodotto in caso di difetti segnalati.
              </p>
              <button 
-               onClick={() => console.log('WIP: Logica di Quarantena')}
-               className="w-full py-3 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200 transition-all duration-300 rounded-xl font-bold flex items-center justify-center gap-2 group shadow-sm active:scale-95"
+               onClick={() => setIsQuarantineModalOpen(true)}
+               disabled={product.status === 'QUARANTINE'}
+               className="w-full py-3 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200 transition-all duration-300 rounded-xl font-bold flex items-center justify-center gap-2 group shadow-sm active:scale-95 disabled:opacity-50 disabled:hover:bg-rose-50 disabled:hover:text-rose-600 disabled:cursor-not-allowed"
              >
                <ShieldAlert size={18} className="group-hover:animate-pulse" />
-               Metti in Quarantena
+               {product.status === 'QUARANTINE' ? 'Già in Quarantena' : 'Metti in Quarantena'}
              </button>
           </div>
         </div>
       </div>
+
+      <QuarantineModal 
+        isOpen={isQuarantineModalOpen}
+        onClose={() => !quarantineMutation.isPending && setIsQuarantineModalOpen(false)}
+        onConfirm={handleQuarantine}
+        isPending={quarantineMutation.isPending}
+      />
     </div>
   );
 }
