@@ -22,6 +22,7 @@ import ActiveProductsList from './pages/admin/ActiveProductsList';
 import QuarantineList from './pages/admin/QuarantineList';
 import LowStockAlerts from './pages/admin/LowStockAlerts';
 import InventoryValue from './pages/admin/InventoryValue';
+import AtRiskLots from './pages/admin/AtRiskLots';
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,7 @@ function App() {
                 <Route path="/admin/quarantine" element={<QuarantineList />} />
                 <Route path="/admin/low-stock-alerts" element={<LowStockAlerts />} />
                 <Route path="/admin/inventory-value" element={<InventoryValue />} />
+                <Route path="/admin/at-risk-lots" element={<AtRiskLots />} />
               </Route>
               
               {/* God Mode Route */}
