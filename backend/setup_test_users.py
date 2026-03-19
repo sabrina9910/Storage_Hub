@@ -17,24 +17,21 @@ users_to_create = [
         'email': 'test@test.com',
         'password': 'test1234',
         'is_superuser': True,
-        'is_admin': True,
-        'is_warehouse_worker': True,
+        'role': 'amministratore',
         'label': 'Superuser',
     },
     {
         'email': 'manager@test.com',
         'password': 'managerpassword',
         'is_superuser': False,
-        'is_admin': True,
-        'is_warehouse_worker': False,
+        'role': 'amministratore',
         'label': 'Manager/Admin',
     },
     {
         'email': 'worker@test.com',
         'password': 'workerpassword',
         'is_superuser': False,
-        'is_admin': False,
-        'is_warehouse_worker': True,
+        'role': 'magazziniere',
         'label': 'Worker',
     },
 ]
@@ -55,7 +52,7 @@ for u in users_to_create:
 
     action = "✅ Creato" if created else "🔄 Aggiornato"
     print(f"{action} [{label}]: {email} / {password}")
-    print(f"   is_superuser={user.is_superuser}, is_admin={user.is_admin}, is_warehouse_worker={user.is_warehouse_worker}")
+    print(f"   is_superuser={user.is_superuser}, role={user.role}")
     print()
 
 print("=== Setup completato! ===")

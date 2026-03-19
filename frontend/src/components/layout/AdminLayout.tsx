@@ -40,11 +40,11 @@ export default function AdminLayout() {
   const navItems = [];
   
   // Base items for everyone who is at least a worker
-  if (currentUser?.is_warehouse_worker || currentUser?.is_admin || currentUser?.is_superuser) {
-    if (currentUser?.is_warehouse_worker && !currentUser?.is_admin && !currentUser?.is_superuser) {
+  if (currentUser?.role === 'magazziniere' || currentUser?.role === 'amministratore' || currentUser?.is_superuser) {
+    if (currentUser?.role === 'magazziniere' && !currentUser?.is_superuser) {
         navItems.push(
-            { name: 'My Workspace', to: '/worker/dashboard', icon: LayoutDashboard },
-            { name: 'Wizard Movimenti', to: '/worker/movement', icon: ArrowLeftRight }
+            { name: 'My Workspace', to: '/magazziniere/dashboard', icon: LayoutDashboard },
+            { name: 'Wizard Movimenti', to: '/magazziniere/movement', icon: ArrowLeftRight }
         );
     } else {
         navItems.push(
@@ -175,7 +175,7 @@ export default function AdminLayout() {
                   {currentUser?.email ? currentUser.email.split('@')[0] : 'Utente'}
                 </p>
                 <p className="text-xs text-slate-500 font-medium uppercase tracking-widest">
-                  {currentUser?.is_superuser ? 'Superuser' : currentUser?.is_warehouse_worker ? 'Worker' : 'Admin'}
+                  {currentUser?.is_superuser ? 'Superuser' : currentUser?.role === 'magazziniere' ? 'Magazziniere' : 'Amministratore'}
                 </p>
               </div>
               <div className="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold border-2 border-white shadow-md uppercase group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all relative">

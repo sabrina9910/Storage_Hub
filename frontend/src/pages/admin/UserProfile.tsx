@@ -27,13 +27,13 @@ export default function UserProfile() {
 
   const roleName = currentUser.is_superuser 
     ? 'Superuser / Amministratore di Sistema' 
-    : currentUser.is_admin 
-      ? 'Manager / Supervisore' 
-      : 'Magazziniere / Operatore';
+    : currentUser.role === 'amministratore' 
+      ? 'Amministratore' 
+      : 'Magazziniere';
       
   const roleColor = currentUser.is_superuser 
     ? 'text-purple-600 bg-purple-100 border-purple-200' 
-    : currentUser.is_admin 
+    : currentUser.role === 'amministratore' 
       ? 'text-blue-600 bg-blue-100 border-blue-200' 
       : 'text-emerald-600 bg-emerald-100 border-emerald-200';
 
@@ -92,8 +92,8 @@ export default function UserProfile() {
                     </div>
                     <p className="text-sm text-slate-500 mt-4 leading-relaxed">
                         {currentUser.is_superuser && 'Hai accesso totale al sistema, ai file di log e alle configurazioni di sicurezza.'}
-                        {currentUser.is_admin && !currentUser.is_superuser && 'Puoi supervisionare il magazzino e accedere alla Dashboard analitica e ai report.'}
-                        {currentUser.is_warehouse_worker && !currentUser.is_admin && !currentUser.is_superuser && 'Puoi gestire l\'intero inventario, movimentare merci e gestire il catalogo senza accedere ai report finanziari.'}
+                        {currentUser.role === 'amministratore' && !currentUser.is_superuser && 'Puoi supervisionare il magazzino e accedere alla Dashboard analitica e ai report.'}
+                        {currentUser.role === 'magazziniere' && !currentUser.is_superuser && 'Puoi gestire l\'intero inventario, movimentare merci e gestire il catalogo senza accedere ai report finanziari.'}
                     </p>
                 </div>
             </div>

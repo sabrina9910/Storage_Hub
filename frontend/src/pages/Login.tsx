@@ -27,10 +27,10 @@ export default function Login() {
 
       toast.success('Accesso effettuato');
 
-      if (user.is_superuser || user.is_admin) {
+      if (user.role === 'amministratore' || user.is_superuser) {
         navigate('/admin/dashboard');
-      } else if (user.is_warehouse_worker) {
-        navigate('/worker/dashboard');
+      } else if (user.role === 'magazziniere') {
+        navigate('/magazziniere/dashboard');
       } else {
         navigate('/admin/dashboard');
       }
@@ -109,7 +109,7 @@ export default function Login() {
               onClick={() => handleQuickLogin('manager@test.com', 'managerpassword')}
               className="text-xs font-medium py-2 px-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 transition-colors border border-blue-200 shadow-sm disabled:opacity-50"
             >
-              {isLoading ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : 'Manager'}
+              {isLoading ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : 'Amministratore'}
             </button>
             <button
               type="button"
@@ -117,7 +117,7 @@ export default function Login() {
               onClick={() => handleQuickLogin('worker@test.com', 'workerpassword')}
               className="text-xs font-medium py-2 px-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 transition-colors border border-emerald-200 shadow-sm disabled:opacity-50"
             >
-              {isLoading ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : 'Worker'}
+              {isLoading ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : 'Magazziniere'}
             </button>
           </div>
         </div>

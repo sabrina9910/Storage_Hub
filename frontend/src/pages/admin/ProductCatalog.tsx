@@ -95,7 +95,7 @@ export default function ProductCatalog() {
         { 
           value: 'QUARANTINE', 
           label: 'In Quarantena', 
-          hidden: currentUser?.is_warehouse_worker && !currentUser?.is_admin && !currentUser?.is_superuser
+          hidden: currentUser?.role === 'magazziniere' && !currentUser?.is_superuser
         }
       ]
     }

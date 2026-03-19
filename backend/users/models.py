@@ -14,7 +14,7 @@ class CustomUserManager(BaseUserManager):
 
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('is_admin', True)
+        extra_fields.setdefault('role', 'amministratore')
 
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
@@ -24,8 +24,12 @@ class CustomUserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
-    is_admin = models.BooleanField(default=False)
-    is_warehouse_worker = models.BooleanField(default=False)
+    
+    ROLE_CHOICES = (
+        ('amministratore', 'Amministratore'),
+        ('magazziniere', 'Magazziniere'),
+    )
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='magazziniere')
     
     objects = CustomUserManager()
 
