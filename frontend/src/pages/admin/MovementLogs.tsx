@@ -6,21 +6,22 @@ import { cn } from '@/lib/utils';
 import { format, subDays, isAfter } from 'date-fns';
 import { it } from 'date-fns/locale';
 import SearchBar from '@/components/common/SearchBar';
+import FilterPanel from '@/components/common/FilterPanel';
 import { useDebounce } from '@/hooks/useDebounce';
 
 export default function MovementLogs() {
-  const [filterDate, setFilterDate] = useState('all');
-  const [filterType, setFilterType] = useState('ALL');
-  const [filterUser, setFilterUser] = useState('ALL');
   const [isGodMode, setIsGodMode] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState<Record<string, string>>({ date: 'all', type: 'ALL', user: 'ALL' });
   const debouncedSearch = useDebounce(searchTerm, 500);
 
   // Queries
   const { data: currentUser } = useQuery({ queryKey:['currentUser'], queryFn: apiServices.getCurrentUser });
+  
+  const queryParams = { search: debouncedSearch, type: filters.type, date: filters.date, user: filters.user };
   const { data: movements, isLoading: mLoading, isFetching: mFetching } = useQuery({ 
-    queryKey: ['movements', debouncedSearch], 
-    queryFn: () => apiServices.getMovements(debouncedSearch) 
+    queryKey: ['movements', queryParams], 
+    queryFn: () => apiServices.getMovements(queryParams) 
   });
   const { data: lots, isLoading: lLoading } = useQuery({ queryKey:['lots'], queryFn: apiServices.getLots });
   const { data: products, isLoading: pLoading } = useQuery({ queryKey:['products'], queryFn: () => apiServices.getProducts() });
@@ -66,30 +67,30 @@ export default function MovementLogs() {
     }).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }, [safeMovements, safeLots, safeProducts, safeUsers, isLoading]);
 
-  // Filtering Logic
+  // Filtering Logic (frontend fallback for complex dates if backend isn't handling it, though we pass it anyway)
   const filteredMovements = useMemo(() => {
     let result = enrichedMovements;
     const now = new Date();
 
-    if (filterDate !== 'all') {
+    if (filters.date !== 'all') {
       let thresholdDate = new Date(0);
-      if (filterDate === 'today') thresholdDate = subDays(now, 1);
-      if (filterDate === '7days') thresholdDate = subDays(now, 7);
-      if (filterDate === '30days') thresholdDate = subDays(now, 30);
+      if (filters.date === 'today') thresholdDate = subDays(now, 1);
+      if (filters.date === '7days') thresholdDate = subDays(now, 7);
+      if (filters.date === '30days') thresholdDate = subDays(now, 30);
       
       result = result.filter(m => isAfter(new Date(m.timestamp), thresholdDate));
     }
 
-    if (filterType !== 'ALL') {
-      result = result.filter(m => m.movement_type === filterType);
+    if (filters.type !== 'ALL') {
+      result = result.filter(m => m.movement_type === filters.type);
     }
 
-    if (filterUser !== 'ALL') {
-      result = result.filter(m => m.user && m.user.toString() === filterUser);
+    if (filters.user !== 'ALL') {
+      result = result.filter(m => m.user && m.user.toString() === filters.user);
     }
 
     return result;
-  }, [enrichedMovements, filterDate, filterType, filterUser]);
+  }, [enrichedMovements, filters]);
 
   const getMovementIcon = (type: string) => {
     switch (type) {
@@ -112,6 +113,42 @@ export default function MovementLogs() {
   };
 
   if (isLoading) return <div className="p-8 text-slate-500">Caricamento Registro...</div>;
+
+  const filterGroups = [
+    {
+      id: 'date',
+      label: 'Periodo',
+      options: [
+        { value: 'all', label: 'Sempre' },
+        { value: 'today', label: 'Oggi' },
+        { value: '7days', label: 'Ultimi 7 Giorni' },
+        { value: '30days', label: 'Ultimi 30 Giorni' }
+      ]
+    },
+    {
+      id: 'type',
+      label: 'Tipo Movimento',
+      options: [
+        { value: 'ALL', label: 'Tutti' },
+        { value: 'IN', label: 'Entrata (IN)' },
+        { value: 'OUT', label: 'Uscita (OUT)' },
+        { value: 'RETURN', label: 'Reso (RETURN)' },
+        { 
+          value: 'QUARANTINE', 
+          label: 'Quarantena (QUARANTINE)',
+          hidden: currentUser?.is_warehouse_worker && !currentUser?.is_admin && !currentUser?.is_superuser 
+        }
+      ]
+    },
+    {
+      id: 'user',
+      label: 'Operatore',
+      options: [
+        { value: 'ALL', label: 'Tutti gli Operatori' },
+        ...(safeUsers.map((u: any) => ({ value: u.id.toString(), label: u.email })))
+      ]
+    }
+  ];
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -163,63 +200,24 @@ export default function MovementLogs() {
       ) : (
         <>
           {/* Filters Toolbar */}
-      <div className="glass-card mb-6 p-4">
-        <div className="flex items-center gap-2 mb-4">
-          <Filter size={18} className="text-primary" />
-          <h3 className="font-bold text-slate-700">Filtri Ricerca</h3>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div className="md:col-span-2">
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Ricerca Libera</label>
+      <div className="glass-card mb-6 p-4 relative z-40">
+        <div className="flex flex-col md:flex-row md:items-center gap-4">
+          <div className="flex-1">
             <SearchBar 
               value={searchTerm} 
               onChange={setSearchTerm} 
-              placeholder="Cerca per prodotto, SKU, lotto..."
+              placeholder="Cerca per prodotto, SKU, lotto (Premi Invio)..."
               isSearching={mFetching && debouncedSearch !== ''}
             />
           </div>
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1 mt-1 md:mt-0">Periodo</label>
-            <select 
-              value={filterDate}
-              onChange={(e) => setFilterDate(e.target.value)}
-              className="w-full px-4 py-3 rounded-2xl bg-white/60 border border-slate-200 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 text-sm font-semibold text-slate-700 transition-all shadow-sm"
-            >
-              <option value="all">Sempre</option>
-              <option value="today">Oggi</option>
-              <option value="7days">Ultimi 7 Giorni</option>
-              <option value="30days">Ultimi 30 Giorni</option>
-            </select>
-          </div>
           
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1 mt-1 md:mt-0">Tipo</label>
-            <select 
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="w-full px-4 py-3 rounded-2xl bg-white/60 border border-slate-200 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 text-sm font-semibold text-slate-700 transition-all shadow-sm"
-            >
-              <option value="ALL">Tutti</option>
-              <option value="IN">Entrata (IN)</option>
-              <option value="OUT">Uscita (OUT)</option>
-              <option value="RETURN">Reso (RETURN)</option>
-              <option value="QUARANTINE">Quarantena (QUARANTINE)</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1 mt-1 md:mt-0">Operatore</label>
-            <select 
-              value={filterUser}
-              onChange={(e) => setFilterUser(e.target.value)}
-              className="w-full px-4 py-3 rounded-2xl bg-white/60 border border-slate-200 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 text-sm font-semibold text-slate-700 transition-all shadow-sm"
-            >
-              <option value="ALL">Tutti</option>
-              {safeUsers.map(u => (
-                <option key={u.id} value={u.id.toString()}>{u.email}</option>
-              ))}
-            </select>
+          <div className="flex items-center gap-3">
+            <FilterPanel 
+              groups={filterGroups}
+              activeFilters={filters}
+              onFilterChange={(groupId, value) => setFilters(prev => ({ ...prev, [groupId]: value }))}
+              onReset={() => setFilters({ date: 'all', type: 'ALL', user: 'ALL' })}
+            />
           </div>
         </div>
       </div>

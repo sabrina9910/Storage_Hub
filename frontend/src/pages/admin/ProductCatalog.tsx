@@ -8,6 +8,7 @@ import { toast } from 'react-hot-toast';
 import LotManagerModal from '@/components/admin/LotManagerModal';
 import ProductCreateModal from '@/components/admin/ProductCreateModal';
 import SearchBar from '@/components/common/SearchBar';
+import FilterPanel from '@/components/common/FilterPanel';
 import { useDebounce } from '@/hooks/useDebounce';
 
 export default function ProductCatalog() {
@@ -18,6 +19,8 @@ export default function ProductCatalog() {
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
   const debouncedSearch = useDebounce(searchTerm, 500);
+  const [filters, setFilters] = useState<Record<string, string>>({ category: 'ALL', status: 'ALL' });
+  const { data: currentUser } = useQuery({ queryKey:['currentUser'], queryFn: apiServices.getCurrentUser });
 
   useEffect(() => {
     const q = searchParams.get('q');
@@ -27,9 +30,10 @@ export default function ProductCatalog() {
   }, [searchParams]);
   
   // Queries
+  const queryParams = { search: debouncedSearch, category: filters.category, status: filters.status };
   const { data: products, isLoading: pLoading, isFetching: pFetching } = useQuery({ 
-    queryKey: ['products', debouncedSearch], 
-    queryFn: () => apiServices.getProducts(debouncedSearch) 
+    queryKey: ['products', queryParams], 
+    queryFn: () => apiServices.getProducts(queryParams) 
   });
   const { data: categories, isLoading: cLoading } = useQuery({ queryKey:['categories'], queryFn: apiServices.getCategories });
   const { data: lots, isLoading: lLoading } = useQuery({ queryKey:['lots'], queryFn: apiServices.getLots });
@@ -72,10 +76,35 @@ export default function ProductCatalog() {
       temp: p.description?.includes('Frigo') ? 'Frigo' : 'Ambiente'
     };
   });
+  const filterGroups = [
+    {
+      id: 'category',
+      label: 'Categoria',
+      options: [
+        { value: 'ALL', label: 'Tutte le categorie' },
+        ...(safeCats.map((c: any) => ({ value: c.id.toString(), label: c.name })))
+      ]
+    },
+    {
+      id: 'status',
+      label: 'Stato Prodotto',
+      options: [
+        { value: 'ALL', label: 'Qualsiasi stato' },
+        { value: 'ACTIVE', label: 'Solo Attivi' },
+        { value: 'LOW_STOCK', label: 'In Esaurimento (Sotto scorta media)' },
+        { 
+          value: 'QUARANTINE', 
+          label: 'In Quarantena', 
+          hidden: currentUser?.is_warehouse_worker && !currentUser?.is_admin && !currentUser?.is_superuser
+        }
+      ]
+    }
+  ];
+
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 relative z-40">
         <div>
           <h2 className="text-3xl font-black text-slate-800 tracking-tight">Catalogo Prodotti</h2>
           <p className="text-slate-500 font-medium mt-1">Gestione anagrafica e lotti inventario.</p>
@@ -89,6 +118,14 @@ export default function ProductCatalog() {
               isSearching={pFetching && debouncedSearch !== ''}
             />
           </div>
+          
+          <FilterPanel 
+            groups={filterGroups}
+            activeFilters={filters}
+            onFilterChange={(groupId, value) => setFilters(prev => ({ ...prev, [groupId]: value }))}
+            onReset={() => setFilters({ category: 'ALL', status: 'ALL' })}
+          />
+
           <button 
             onClick={() => setIsCreatingProduct(true)}
             className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/30 transition-all active:scale-95 shrink-0 h-[46px]"
