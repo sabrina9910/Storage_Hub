@@ -12,6 +12,22 @@ export default function AdminLayout() {
 
   const { data: currentUser } = useQuery({ queryKey:['currentUser'], queryFn: apiServices.getCurrentUser });
 
+  const [globalSearch, setGlobalSearch] = useState('');
+
+  const handleGlobalSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && globalSearch.trim() !== '') {
+      const q = globalSearch.trim();
+      try {
+        const history = JSON.parse(localStorage.getItem('storagehub_search_history') || '[]');
+        const newHistory = [q, ...history.filter((h: string) => h !== q)].slice(0, 10);
+        localStorage.setItem('storagehub_search_history', JSON.stringify(newHistory));
+      } catch (err) {}
+      
+      navigate(`/admin/search?q=${encodeURIComponent(q)}`);
+      setGlobalSearch('');
+    }
+  };
+
   useEffect(() => {
     setIsSidebarOpen(false);
   }, [location.pathname]);
@@ -140,7 +156,10 @@ export default function AdminLayout() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
               <input 
                 type="text" 
-                placeholder="Cerca un SKU o Prodotto..." 
+                value={globalSearch}
+                onChange={(e) => setGlobalSearch(e.target.value)}
+                onKeyDown={handleGlobalSearch}
+                placeholder="Cerca prodotto (Premi Invio)..." 
                 className="w-full pl-12 pr-4 py-2.5 rounded-full border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none bg-white/60 shadow-inner transition-all text-sm font-medium"
               />
             </div>

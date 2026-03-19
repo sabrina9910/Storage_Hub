@@ -24,6 +24,7 @@ import LowStockAlerts from './pages/admin/LowStockAlerts';
 import InventoryValue from './pages/admin/InventoryValue';
 import AtRiskLots from './pages/admin/AtRiskLots';
 import ProductDetail from './pages/admin/ProductDetail';
+import GlobalSearch from './pages/admin/GlobalSearch';
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ function App() {
                 <Route path="/admin/suppliers" element={<SupplierManager />} />
                 <Route path="/admin/inventory" element={<MovementLogs />} />
                 <Route path="/admin/profile" element={<UserProfile />} />
+                <Route path="/admin/search" element={<GlobalSearch />} />
                 
                 {/* Keep old worker routes functional for backward compatibility if needed, or redirect them */}
                 <Route path="/worker/dashboard" element={<WorkerDashboard />} />

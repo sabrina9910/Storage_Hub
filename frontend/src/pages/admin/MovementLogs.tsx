@@ -5,18 +5,25 @@ import { Filter, ArrowDownUp, Package, History, ArrowRight, ArrowLeft, RefreshCw
 import { cn } from '@/lib/utils';
 import { format, subDays, isAfter } from 'date-fns';
 import { it } from 'date-fns/locale';
+import SearchBar from '@/components/common/SearchBar';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export default function MovementLogs() {
   const [filterDate, setFilterDate] = useState('all');
   const [filterType, setFilterType] = useState('ALL');
   const [filterUser, setFilterUser] = useState('ALL');
   const [isGodMode, setIsGodMode] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 500);
 
   // Queries
   const { data: currentUser } = useQuery({ queryKey:['currentUser'], queryFn: apiServices.getCurrentUser });
-  const { data: movements, isLoading: mLoading } = useQuery({ queryKey:['movements'], queryFn: apiServices.getMovements });
+  const { data: movements, isLoading: mLoading, isFetching: mFetching } = useQuery({ 
+    queryKey: ['movements', debouncedSearch], 
+    queryFn: () => apiServices.getMovements(debouncedSearch) 
+  });
   const { data: lots, isLoading: lLoading } = useQuery({ queryKey:['lots'], queryFn: apiServices.getLots });
-  const { data: products, isLoading: pLoading } = useQuery({ queryKey:['products'], queryFn: apiServices.getProducts });
+  const { data: products, isLoading: pLoading } = useQuery({ queryKey:['products'], queryFn: () => apiServices.getProducts() });
   const { data: users, isLoading: uLoading } = useQuery({ queryKey:['users'], queryFn: apiServices.getUsers });
 
   const isLoading = mLoading || lLoading || pLoading || uLoading;
@@ -162,13 +169,22 @@ export default function MovementLogs() {
           <h3 className="font-bold text-slate-700">Filtri Ricerca</h3>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="md:col-span-2">
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Ricerca Libera</label>
+            <SearchBar 
+              value={searchTerm} 
+              onChange={setSearchTerm} 
+              placeholder="Cerca per prodotto, SKU, lotto..."
+              isSearching={mFetching && debouncedSearch !== ''}
+            />
+          </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Periodo</label>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1 mt-1 md:mt-0">Periodo</label>
             <select 
               value={filterDate}
               onChange={(e) => setFilterDate(e.target.value)}
-              className="w-full px-4 py-2 rounded-xl bg-white/60 border border-slate-200 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm font-semibold text-slate-700 transition-all shadow-sm"
+              className="w-full px-4 py-3 rounded-2xl bg-white/60 border border-slate-200 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 text-sm font-semibold text-slate-700 transition-all shadow-sm"
             >
               <option value="all">Sempre</option>
               <option value="today">Oggi</option>
@@ -178,11 +194,11 @@ export default function MovementLogs() {
           </div>
           
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Tipo Movimento</label>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1 mt-1 md:mt-0">Tipo</label>
             <select 
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="w-full px-4 py-2 rounded-xl bg-white/60 border border-slate-200 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm font-semibold text-slate-700 transition-all shadow-sm"
+              className="w-full px-4 py-3 rounded-2xl bg-white/60 border border-slate-200 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 text-sm font-semibold text-slate-700 transition-all shadow-sm"
             >
               <option value="ALL">Tutti</option>
               <option value="IN">Entrata (IN)</option>
@@ -193,13 +209,13 @@ export default function MovementLogs() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Operatore</label>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1 mt-1 md:mt-0">Operatore</label>
             <select 
               value={filterUser}
               onChange={(e) => setFilterUser(e.target.value)}
-              className="w-full px-4 py-2 rounded-xl bg-white/60 border border-slate-200 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm font-semibold text-slate-700 transition-all shadow-sm"
+              className="w-full px-4 py-3 rounded-2xl bg-white/60 border border-slate-200 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 text-sm font-semibold text-slate-700 transition-all shadow-sm"
             >
-              <option value="ALL">Tutti gli Operatori</option>
+              <option value="ALL">Tutti</option>
               {safeUsers.map(u => (
                 <option key={u.id} value={u.id.toString()}>{u.email}</option>
               ))}
@@ -226,9 +242,9 @@ export default function MovementLogs() {
             <div className="divide-y divide-slate-100/50">
               {filteredMovements.length === 0 ? (
                 <div className="p-16 text-center text-slate-400 flex flex-col items-center">
-                  <History size={48} className="mb-4 opacity-50" />
-                  <p className="font-semibold text-lg">Nessun movimento trovato</p>
-                  <p className="text-sm mt-1">Modifica i filtri di ricerca per ottenere altri risultati.</p>
+                  <History size={48} className="mb-4 opacity-50 text-slate-300" />
+                  <p className="font-semibold text-lg">{debouncedSearch ? "Nessun elemento trovato per la tua ricerca." : "Nessun movimento trovato"}</p>
+                  <p className="text-sm mt-1">{debouncedSearch ? "Prova con una keyword diversa." : "Modifica i filtri di ricerca per ottenere altri risultati."}</p>
                 </div>
               ) : (
                 filteredMovements.map(movement => {
