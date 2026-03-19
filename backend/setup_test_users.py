@@ -16,6 +16,10 @@ users_to_create = [
     {
         'email': 'test@test.com',
         'password': 'test1234',
+        'first_name': 'Super',
+        'last_name': 'Mario',
+        'phone': '+39 333 1234567',
+        'contract_type': 'Indeterminato',
         'is_superuser': True,
         'role': 'amministratore',
         'label': 'Superuser',
@@ -23,6 +27,10 @@ users_to_create = [
     {
         'email': 'manager@test.com',
         'password': 'managerpassword',
+        'first_name': 'Giulia',
+        'last_name': 'Amministratrice',
+        'phone': '+39 333 7654321',
+        'contract_type': 'Indeterminato',
         'is_superuser': False,
         'role': 'amministratore',
         'label': 'Manager/Admin',
@@ -30,6 +38,10 @@ users_to_create = [
     {
         'email': 'worker@test.com',
         'password': 'workerpassword',
+        'first_name': 'Luigi',
+        'last_name': 'Verdi',
+        'phone': '+39 333 9876543',
+        'contract_type': 'Determinato',
         'is_superuser': False,
         'role': 'magazziniere',
         'label': 'Worker',

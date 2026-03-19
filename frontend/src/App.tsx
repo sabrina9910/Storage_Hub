@@ -14,6 +14,7 @@ import MovementLogs from './pages/admin/MovementLogs';
 import UserProfile from './pages/admin/UserProfile';
 import WorkerDashboard from './pages/worker/WorkerDashboard';
 import DesktopMovementWizard from './pages/worker/DesktopMovementWizard';
+import UsersManagement from './pages/admin/UsersManagement';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
 
@@ -64,6 +65,7 @@ function App() {
                 <Route path="/admin/dashboard" element={<DashboardAdmin />} />
                 <Route path="/admin/active-products" element={<ActiveProductsList />} />
                 <Route path="/admin/quarantine" element={<QuarantineList />} />
+                <Route path="/admin/users" element={<UsersManagement />} />
                 <Route path="/admin/low-stock-alerts" element={<LowStockAlerts />} />
                 <Route path="/admin/inventory-value" element={<InventoryValue />} />
                 <Route path="/admin/at-risk-lots" element={<AtRiskLots />} />
