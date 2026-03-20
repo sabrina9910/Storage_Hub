@@ -20,7 +20,7 @@ export default function WorkerDashboard() {
 
   const { data: movements } = useQuery({
     queryKey: ['movements'],
-    queryFn: apiServices.getMovements,
+    queryFn: () => apiServices.getMovements(),
   });
 
   const safeMovements = Array.isArray(movements?.results || movements) ? (movements?.results || movements) : [];

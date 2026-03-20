@@ -10,17 +10,30 @@ import DashboardAdmin from './pages/admin/DashboardAdmin';
 import ProductCatalog from './pages/admin/ProductCatalog';
 import CategoryManager from './pages/admin/CategoryManager';
 import SupplierManager from './pages/admin/SupplierManager';
+import SupplierDetail from './pages/admin/SupplierDetail';
 import MovementLogs from './pages/admin/MovementLogs';
 import UserProfile from './pages/admin/UserProfile';
 import WorkerDashboard from './pages/worker/WorkerDashboard';
 import DesktopMovementWizard from './pages/worker/DesktopMovementWizard';
+import UsersManagement from './pages/admin/UsersManagement';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
 
-const queryClient = new QueryClient();
+// New KPI Drill-down Pages
+import ActiveProductsList from './pages/admin/ActiveProductsList';
+import QuarantineList from './pages/admin/QuarantineList';
+import LowStockAlerts from './pages/admin/LowStockAlerts';
+import InventoryValue from './pages/admin/InventoryValue';
+import AtRiskLots from './pages/admin/AtRiskLots';
+import ProductDetail from './pages/admin/ProductDetail';
+import GlobalSearch from './pages/admin/GlobalSearch';
+import Profile from './pages/admin/Profile';
+import SystemLogs from './pages/admin/SystemLogs';
+import Movimenti from './pages/admin/Movimenti';
+import Blacklist from './pages/admin/Blacklist';
+import AuditLog from './pages/admin/AuditLog';
 
-// Placeholder for System Logs (God Mode)
-const SystemLogs = () => <div className="p-8 text-slate-800"><h1 className="text-2xl font-bold mb-4">System Config & Logs</h1><p>Raw system operational logs will be displayed here.</p></div>;
+const queryClient = new QueryClient();
 
 function App() {
   return (
@@ -34,24 +47,37 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<AdminLayout />}>
               <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-              <Route path="/worker" element={<Navigate to="/worker/dashboard" replace />} />
+              <Route path="/magazziniere" element={<Navigate to="/magazziniere/dashboard" replace />} />
               
               {/* Unified Inventory Routes (Admin + Worker) */}
-              <Route element={<ProtectedRoute requiredRole="worker" />}>
+              <Route element={<ProtectedRoute requiredRole="magazziniere" />}>
                 <Route path="/admin/products" element={<ProductCatalog />} />
                 <Route path="/admin/categories" element={<CategoryManager />} />
                 <Route path="/admin/suppliers" element={<SupplierManager />} />
+                <Route path="/admin/suppliers/:id" element={<SupplierDetail />} />
                 <Route path="/admin/inventory" element={<MovementLogs />} />
+                <Route path="/admin/movimenti" element={<Movimenti />} />
                 <Route path="/admin/profile" element={<UserProfile />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/admin/search" element={<GlobalSearch />} />
                 
                 {/* Keep old worker routes functional for backward compatibility if needed, or redirect them */}
-                <Route path="/worker/dashboard" element={<WorkerDashboard />} />
-                <Route path="/worker/movement" element={<DesktopMovementWizard />} />
+                <Route path="/magazziniere/dashboard" element={<WorkerDashboard />} />
+                <Route path="/magazziniere/movement" element={<DesktopMovementWizard />} />
               </Route>
 
               {/* Strict Admin Routes */}
-              <Route element={<ProtectedRoute requiredRole="admin" />}>
+              <Route element={<ProtectedRoute requiredRole="amministratore" />}>
                 <Route path="/admin/dashboard" element={<DashboardAdmin />} />
+                <Route path="/admin/active-products" element={<ActiveProductsList />} />
+                <Route path="/admin/quarantine" element={<QuarantineList />} />
+                <Route path="/admin/blacklist" element={<Blacklist />} />
+                <Route path="/admin/audit-log" element={<AuditLog />} />
+                <Route path="/admin/users" element={<UsersManagement />} />
+                <Route path="/admin/low-stock-alerts" element={<LowStockAlerts />} />
+                <Route path="/admin/inventory-value" element={<InventoryValue />} />
+                <Route path="/admin/at-risk-lots" element={<AtRiskLots />} />
+                <Route path="/admin/products/:id" element={<ProductDetail />} />
               </Route>
               
               {/* God Mode Route */}

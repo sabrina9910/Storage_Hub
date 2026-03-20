@@ -1,12 +1,14 @@
 from rest_framework import serializers
 from django.db import transaction
 from .models import StockMovement
-from prodotti.models import ProductLot
-from prodotti.serializers import ProductLotSerializer
+from prodotti.models import ProductLot, Product
+from prodotti.serializers import ProductLotSerializer, ProductSerializer
 
 class StockMovementSerializer(serializers.ModelSerializer):
     lot_detail = ProductLotSerializer(source='lot', read_only=True)
-    user_email = serializers.EmailField(source='user.email', read_only=True)
+    product_detail = ProductSerializer(source='product', read_only=True)
+    product_name = serializers.SerializerMethodField()
+    product_sku = serializers.SerializerMethodField()
     
     class Meta:
         model = StockMovement

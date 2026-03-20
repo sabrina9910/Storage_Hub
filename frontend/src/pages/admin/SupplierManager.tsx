@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { apiServices } from '@/lib/api';
-import { ChevronRight, Plus, Package, Building2, X, DollarSign, Store } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { ChevronRight, Plus, Package, Building2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 export default function SupplierManager() {
@@ -88,20 +88,19 @@ export default function SupplierManager() {
               <div className="p-8 text-center text-slate-400">Nessun fornitore registrato.</div>
             ) : (
               safeSuppliers.map(supplier => {
-                const isExpanded = expandedSupplier === supplier.id;
                 const suppProducts = getSupplierProducts(supplier.id);
 
                 return (
                   <div key={supplier.id} className="transition-colors hover:bg-white/40">
                     <div 
-                      onClick={() => toggleExpand(supplier.id)}
+                      onClick={() => navigate(`/admin/suppliers/${supplier.id}`)}
                       className="grid grid-cols-12 gap-4 p-4 items-center cursor-pointer"
                     >
                       <div className="col-span-1 flex justify-center text-slate-400">
-                        <ChevronRight size={20} className={cn("transition-transform", isExpanded && "text-primary translate-x-1")} />
+                        <ChevronRight size={20} className="transition-transform" />
                       </div>
                       <div className="col-span-4 font-bold text-slate-800 flex items-center gap-2">
-                        <Building2 size={16} className={cn(isExpanded ? "text-primary" : "text-slate-400")} /> {supplier.name}
+                        <Building2 size={16} className="text-slate-400" /> {supplier.name}
                       </div>
                       <div className="col-span-3 text-slate-600">
                         {supplier.contact_person || '-'}
@@ -123,80 +122,6 @@ export default function SupplierManager() {
           </div>
         </div>
       </div>
-
-      {/* Slide-over Side Panel (Sheet) for Supplier Details */}
-      {expandedSupplier && (
-        <>
-          <div 
-            className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 animate-in fade-in duration-300" 
-            onClick={() => setExpandedSupplier(null)} 
-          />
-          <div className="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-2xl z-50 animate-in slide-in-from-right duration-300 flex flex-col border-l border-slate-200">
-            {(() => {
-              const supplier = safeSuppliers.find(s => s.id === expandedSupplier);
-              if (!supplier) return null;
-              const suppProducts = getSupplierProducts(supplier.id);
-              const totalInventoryValue = suppProducts.reduce((sum, p) => sum + (p.unit_price * p.totalStock), 0);
-              
-              return (
-                <>
-                  <div className="p-6 border-b border-slate-100 bg-slate-50 flex items-start justify-between shrink-0">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="bg-primary/10 text-primary p-1.5 rounded-lg"><Store size={20} /></span>
-                        <h3 className="text-2xl font-black text-slate-800 tracking-tight">{supplier.name}</h3>
-                      </div>
-                      <p className="text-sm font-medium text-slate-500 ml-9">Scheda Fornitore e Referenze</p>
-                    </div>
-                    <button onClick={() => setExpandedSupplier(null)} className="p-2 text-slate-400 hover:text-slate-700 bg-white rounded-full shadow-sm transition-colors">
-                      <X size={20} />
-                    </button>
-                  </div>
-                  
-                  <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-slate-50/30">
-                    {/* Aggregated KPI */}
-                    <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-5 text-white shadow-lg shadow-emerald-500/20">
-                      <div className="flex items-center gap-2 text-emerald-100 mb-1">
-                        <DollarSign size={16} /> <span className="text-xs font-bold uppercase tracking-widest">Valore a Magazzino</span>
-                      </div>
-                      <div className="text-3xl font-black tracking-tighter">
-                        €{totalInventoryValue.toLocaleString('it-IT', { minimumFractionDigits: 2 })}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <Package size={14} /> Prodotti Forniti ({suppProducts.length})
-                      </h4>
-                      {suppProducts.length === 0 ? (
-                        <div className="p-4 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-sm text-slate-500 text-center font-medium">
-                          Nessun prodotto associato a questo fornitore.
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          {suppProducts.map(sp => (
-                            <div key={sp.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center group hover:border-primary/30 transition-colors">
-                              <div>
-                                <div className="text-[10px] font-bold font-mono text-slate-400 mb-0.5">{sp.sku}</div>
-                                <div className="font-bold text-slate-800 text-sm">{sp.name}</div>
-                                <div className="text-xs text-slate-500 font-medium">€{Number(sp.unit_price).toFixed(2)} / {sp.unit_of_measure}</div>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-0.5">Giacenza</div>
-                                <div className="text-lg font-black text-primary">{sp.totalStock}</div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </>
-              );
-            })()}
-          </div>
-        </>
-      )}
 
       {/* Add Supplier Modal */}
       {isAddModalOpen && (

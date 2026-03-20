@@ -7,6 +7,9 @@ import { cn } from '@/lib/utils';
 import { toast } from 'react-hot-toast';
 import LotManagerModal from '@/components/admin/LotManagerModal';
 import ProductCreateModal from '@/components/admin/ProductCreateModal';
+import SearchBar from '@/components/common/SearchBar';
+import FilterPanel from '@/components/common/FilterPanel';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export default function ProductCatalog() {
   const queryClient = useQueryClient();
@@ -15,9 +18,25 @@ export default function ProductCatalog() {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
+  const [searchParams] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
+  const debouncedSearch = useDebounce(searchTerm, 500);
+  const [filters, setFilters] = useState<Record<string, string>>({ category: 'ALL', status: 'ALL' });
+  const { data: currentUser } = useQuery({ queryKey:['currentUser'], queryFn: apiServices.getCurrentUser });
+
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q !== null) {
+      setSearchTerm(q);
+    }
+  }, [searchParams]);
   
   // Queries
-  const { data: products, isLoading: pLoading } = useQuery({ queryKey:['products'], queryFn: apiServices.getProducts });
+  const queryParams = { search: debouncedSearch, category: filters.category, status: filters.status };
+  const { data: products, isLoading: pLoading, isFetching: pFetching } = useQuery({ 
+    queryKey: ['products', queryParams], 
+    queryFn: () => apiServices.getProducts(queryParams) 
+  });
   const { data: categories, isLoading: cLoading } = useQuery({ queryKey:['categories'], queryFn: apiServices.getCategories });
   const { data: lots, isLoading: lLoading } = useQuery({ queryKey:['lots'], queryFn: apiServices.getLots });
 
@@ -83,7 +102,7 @@ export default function ProductCatalog() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
-      <div className="flex justify-between items-end mb-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 relative z-40">
         <div>
           <h2 className="text-3xl font-black text-slate-800 tracking-tight">
             {skuFilter ? `Risultato per SKU: ${skuFilter}` : 'Catalogo Prodotti'}
@@ -100,12 +119,30 @@ export default function ProductCatalog() {
             </button>
           )}
         </div>
-        <button 
-          onClick={() => setIsCreatingProduct(true)}
-          className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-primary/30 transition-all active:scale-95"
-        >
-          <Plus size={20} /> Crea Prodotto
-        </button>
+        <div className="flex items-center gap-4 w-full md:w-auto">
+          <div className="w-full md:w-80 h-12 flex items-center">
+            <SearchBar 
+              value={searchTerm} 
+              onChange={setSearchTerm} 
+              placeholder="Cerca nome, SKU..."
+              isSearching={pFetching && debouncedSearch !== ''}
+            />
+          </div>
+          
+          <FilterPanel 
+            groups={filterGroups}
+            activeFilters={filters}
+            onFilterChange={(groupId, value) => setFilters(prev => ({ ...prev, [groupId]: value }))}
+            onReset={() => setFilters({ category: 'ALL', status: 'ALL' })}
+          />
+
+          <button 
+            onClick={() => setIsCreatingProduct(true)}
+            className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/30 transition-all active:scale-95 shrink-0 h-[46px]"
+          >
+            <Plus size={20} /> <span className="hidden sm:inline">Crea Prodotto</span>
+          </button>
+        </div>
       </div>
 
       <div className="glass-card overflow-hidden">
@@ -123,7 +160,8 @@ export default function ProductCatalog() {
             {enrichedProducts.length === 0 ? (
               <div className="p-12 text-center text-slate-400 flex flex-col items-center">
                 <PackageOpen size={48} className="mb-4 opacity-50" />
-                <p>Il catalogo è attualmente vuoto.</p>
+                <p className="font-bold text-lg">{debouncedSearch ? "Nessun elemento trovato per la tua ricerca." : "Il catalogo è attualmente vuoto."}</p>
+                {debouncedSearch && <p className="text-sm mt-1">Prova a usare termini di ricerca diversi.</p>}
               </div>
             ) : (
               enrichedProducts.map((product: any) => {
@@ -145,7 +183,9 @@ export default function ProductCatalog() {
                       </div>
                       <div className="col-span-3 flex flex-col justify-center">
                         <div className="font-bold text-slate-800 flex items-center gap-2 line-clamp-1" title={product.name}>
-                          {product.name}
+                          <Link to={`/admin/products/${product.id}`} onClick={(e) => e.stopPropagation()} className="hover:text-primary hover:underline transition-all">
+                            {product.name}
+                          </Link>
                           {!product.is_active && <span className="bg-rose-100 text-rose-600 text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider">Inattivo</span>}
                         </div>
                         <div className="flex items-center gap-2 mt-1">
@@ -167,6 +207,14 @@ export default function ProductCatalog() {
                         {product.totalQty}<span className="text-[10px] text-slate-400 ml-1 uppercase">{product.unit_of_measure}</span>
                       </div>
                       <div className="col-span-2 flex justify-end gap-2 pr-2">
+                        <Link
+                          to={`/admin/products/${product.id}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl transition-colors active:scale-95"
+                          title="Vedi Dettaglio"
+                        >
+                          <Info size={18} />
+                        </Link>
                         <button 
                           onClick={(e) => { e.stopPropagation(); setSelectedProduct(product); }}
                           className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl transition-colors active:scale-95"

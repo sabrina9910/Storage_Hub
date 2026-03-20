@@ -12,13 +12,19 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 import os
 from pathlib import Path
-from dotenv import load_dotenv
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv_available = True
+except ImportError:
+    load_dotenv_available = False
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load environment variables from .env file
-load_dotenv(BASE_DIR / '.env')
+# Load environment variables from .env file if dotenv is available
+if load_dotenv_available:
+    load_dotenv(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -57,6 +63,7 @@ INSTALLED_APPS = [
     'movimenti',
     'alert_report',
     'chatbot',
+    'auditlog',
 ]
 
 MIDDLEWARE = [

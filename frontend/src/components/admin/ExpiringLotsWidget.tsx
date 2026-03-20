@@ -1,4 +1,5 @@
 import { AlertCircle, Tag, Trash2, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { toast } from 'react-hot-toast';
 
@@ -99,14 +100,12 @@ export default function ExpiringLotsWidget({ lots }: { lots: any[] }) {
             })
           )}
         </div>
-        
-        {expiringLots.length > 0 && (
-          <div className="p-4 border-t border-white/40 bg-white/30 backdrop-blur-md">
-            <button className="w-full py-3 bg-white border border-slate-200 text-sm font-bold text-slate-700 rounded-xl hover:text-primary hover:border-primary/50 hover:shadow-sm transition-all flex items-center justify-center gap-2 group">
-              Vedi Tutti i Lotti a Rischio <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  }
+
+        <div className="p-4 border-t border-white/40 bg-white/30 backdrop-blur-md">
+          <Link to="/admin/at-risk-lots" className="w-full py-3 bg-white border border-slate-200 text-sm font-bold text-slate-700 rounded-xl hover:text-amber-600 hover:border-amber-500/50 hover:shadow-sm transition-all flex items-center justify-center gap-2 group">
+            Visualizza tutti i lotti a rischio <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+    </div>
+  );
+}

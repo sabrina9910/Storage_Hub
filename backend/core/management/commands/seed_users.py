@@ -13,15 +13,13 @@ class Command(BaseCommand):
             {
                 'email': 'admin@example.com',
                 'password': 'password123',
-                'is_admin': True,
-                'is_warehouse_worker': False,
+                'role': 'amministratore',
                 'role_name': 'Admin'
             },
             {
                 'email': 'worker@example.com',
                 'password': 'password123',
-                'is_admin': False,
-                'is_warehouse_worker': True,
+                'role': 'magazziniere',
                 'role_name': 'Worker'
             },
             {

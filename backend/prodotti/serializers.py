@@ -1,11 +1,11 @@
 from rest_framework import serializers
 from .models import Product, ProductLot
 from categorie.serializers import CategorySerializer
-from fornitori.serializers import SupplierSerializer
+from fornitori.serializers import SupplierSimpleSerializer
 
 class ProductSerializer(serializers.ModelSerializer):
     category_detail = CategorySerializer(source='category', read_only=True)
-    suppliers_detail = SupplierSerializer(source='suppliers', many=True, read_only=True)
+    suppliers_detail = SupplierSimpleSerializer(source='suppliers', many=True, read_only=True)
     
     class Meta:
         model = Product

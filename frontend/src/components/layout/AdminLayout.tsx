@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { LayoutDashboard, Package, ArrowLeftRight, Users, LogOut, Search, Menu, X, Terminal, Tags, UserCircle } from 'lucide-react';
+import { LayoutDashboard, PackageSearch, ArrowLeftRight, Users, LogOut, Search, Menu, X, Terminal, Tags, UserCircle, ClipboardList, Ban, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { apiServices } from '@/lib/api';
 import NotificationBell from './NotificationBell';
@@ -13,6 +13,22 @@ export default function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const { data: currentUser } = useQuery({ queryKey:['currentUser'], queryFn: apiServices.getCurrentUser });
+
+  const [globalSearch, setGlobalSearch] = useState('');
+
+  const handleGlobalSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && globalSearch.trim() !== '') {
+      const q = globalSearch.trim();
+      try {
+        const history = JSON.parse(localStorage.getItem('storagehub_search_history') || '[]');
+        const newHistory = [q, ...history.filter((h: string) => h !== q)].slice(0, 10);
+        localStorage.setItem('storagehub_search_history', JSON.stringify(newHistory));
+      } catch (err) {}
+      
+      navigate(`/admin/search?q=${encodeURIComponent(q)}`);
+      setGlobalSearch('');
+    }
+  };
 
   useEffect(() => {
     setIsSidebarOpen(false);
@@ -26,11 +42,11 @@ export default function AdminLayout() {
   const navItems = [];
   
   // Base items for everyone who is at least a worker
-  if (currentUser?.is_warehouse_worker || currentUser?.is_admin || currentUser?.is_superuser) {
-    if (currentUser?.is_warehouse_worker && !currentUser?.is_admin && !currentUser?.is_superuser) {
+  if (currentUser?.role === 'magazziniere' || currentUser?.role === 'amministratore' || currentUser?.is_superuser) {
+    if (currentUser?.role === 'magazziniere' && !currentUser?.is_superuser) {
         navItems.push(
-            { name: 'My Workspace', to: '/worker/dashboard', icon: LayoutDashboard },
-            { name: 'Wizard Movimenti', to: '/worker/movement', icon: ArrowLeftRight }
+            { name: 'My Workspace', to: '/magazziniere/dashboard', icon: LayoutDashboard },
+            { name: 'Wizard Movimenti', to: '/magazziniere/movement', icon: ArrowLeftRight }
         );
     } else {
         navItems.push(
@@ -40,17 +56,26 @@ export default function AdminLayout() {
 
     // Shared inventory management items
     navItems.push(
-      { name: 'Catalogo', to: '/admin/products', icon: Package },
+      { name: 'Prodotti e Cataloghi', to: '/admin/products', icon: PackageSearch },
       { name: 'Categorie', to: '/admin/categories', icon: Tags },
+      { name: 'Movimenti', to: '/admin/movimenti', icon: ClipboardList },
       { name: 'Registro Mov.', to: '/admin/inventory', icon: ArrowLeftRight },
       { name: 'Fornitori', to: '/admin/suppliers', icon: Users }
     );
   }
 
-  // God Mode specific items
-  if (currentUser?.is_superuser) {
+  // God Mode and Admin specific items
+  if (currentUser?.is_superuser || currentUser?.role === 'amministratore') {
     navItems.push(
       { name: 'System Logs', to: '/admin/system', icon: Terminal }
+    );
+  }
+
+  // Admin/Manager specific items
+  if (currentUser?.role === 'amministratore' || currentUser?.is_superuser) {
+    navItems.push(
+      { name: 'Blacklist', to: '/admin/blacklist', icon: Ban },
+      { name: 'Audit Log', to: '/admin/audit-log', icon: FileText }
     );
   }
 
@@ -142,7 +167,10 @@ export default function AdminLayout() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
               <input 
                 type="text" 
-                placeholder="Cerca un SKU o Prodotto..." 
+                value={globalSearch}
+                onChange={(e) => setGlobalSearch(e.target.value)}
+                onKeyDown={handleGlobalSearch}
+                placeholder="Cerca prodotto (Premi Invio)..." 
                 className="w-full pl-12 pr-4 py-2.5 rounded-full border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none bg-white/60 shadow-inner transition-all text-sm font-medium"
               />
             </div>
@@ -162,7 +190,7 @@ export default function AdminLayout() {
                   {currentUser?.email ? currentUser.email.split('@')[0] : 'Utente'}
                 </p>
                 <p className="text-xs text-slate-500 font-medium uppercase tracking-widest">
-                  {currentUser?.is_superuser ? 'Superuser' : currentUser?.is_warehouse_worker ? 'Worker' : 'Admin'}
+                  {currentUser?.is_superuser ? 'Superuser' : currentUser?.role === 'magazziniere' ? 'Magazziniere' : 'Amministratore'}
                 </p>
               </div>
               <div className="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold border-2 border-white shadow-md uppercase group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all relative">
