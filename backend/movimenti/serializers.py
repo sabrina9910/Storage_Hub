@@ -1,17 +1,33 @@
 from rest_framework import serializers
 from django.db import transaction
 from .models import StockMovement
-from prodotti.models import ProductLot
-from prodotti.serializers import ProductLotSerializer
+from prodotti.models import ProductLot, Product
+from prodotti.serializers import ProductLotSerializer, ProductSerializer
 
 class StockMovementSerializer(serializers.ModelSerializer):
     lot_detail = ProductLotSerializer(source='lot', read_only=True)
-    user_email = serializers.EmailField(source='user.email', read_only=True)
+    product_detail = ProductSerializer(source='product', read_only=True)
+    product_name = serializers.SerializerMethodField()
+    product_sku = serializers.SerializerMethodField()
     
     class Meta:
         model = StockMovement
         fields = '__all__'
-        read_only_fields = ['timestamp']
+        read_only_fields = ['timestamp', 'user_full_name', 'user_email', 'user_role']
+    
+    def get_product_name(self, obj):
+        if obj.product:
+            return obj.product.name
+        elif obj.lot:
+            return obj.lot.product.name
+        return 'N/A'
+    
+    def get_product_sku(self, obj):
+        if obj.product:
+            return obj.product.sku
+        elif obj.lot:
+            return obj.lot.product.sku
+        return 'N/A'
 
     def create(self, validated_data):
         movement_type = validated_data.get('movement_type')
