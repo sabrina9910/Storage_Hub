@@ -20,10 +20,11 @@ export default function WorkerDashboard() {
 
   const { data: movements } = useQuery({
     queryKey: ['movements'],
-    queryFn: apiServices.getMovements,
+    queryFn: () => apiServices.getMovements(),
   });
 
-  const myMovements = movements?.filter((m: any) => m.user === user?.id) || [];
+  const movementsList = movements?.results || movements || [];
+  const myMovements = Array.isArray(movementsList) ? movementsList.filter((m: any) => m.user === user?.id) : [];
   const todayMovements = myMovements.filter((m: any) => new Date(m.timestamp).toDateString() === new Date().toDateString());
 
   return (
