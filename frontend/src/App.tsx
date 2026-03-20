@@ -27,11 +27,10 @@ import InventoryValue from './pages/admin/InventoryValue';
 import AtRiskLots from './pages/admin/AtRiskLots';
 import ProductDetail from './pages/admin/ProductDetail';
 import GlobalSearch from './pages/admin/GlobalSearch';
+import Profile from './pages/admin/Profile';
+import SystemLogs from './pages/admin/SystemLogs';
 
 const queryClient = new QueryClient();
-
-// Placeholder for System Logs (God Mode)
-const SystemLogs = () => <div className="p-8 text-slate-800"><h1 className="text-2xl font-bold mb-4">System Config & Logs</h1><p>Raw system operational logs will be displayed here.</p></div>;
 
 function App() {
   return (
@@ -55,6 +54,7 @@ function App() {
                 <Route path="/admin/suppliers/:id" element={<SupplierDetail />} />
                 <Route path="/admin/inventory" element={<MovementLogs />} />
                 <Route path="/admin/profile" element={<UserProfile />} />
+                <Route path="/profile" element={<Profile />} />
                 <Route path="/admin/search" element={<GlobalSearch />} />
                 
                 {/* Keep old worker routes functional for backward compatibility if needed, or redirect them */}
