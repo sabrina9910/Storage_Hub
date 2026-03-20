@@ -10,6 +10,7 @@ import DashboardAdmin from './pages/admin/DashboardAdmin';
 import ProductCatalog from './pages/admin/ProductCatalog';
 import CategoryManager from './pages/admin/CategoryManager';
 import SupplierManager from './pages/admin/SupplierManager';
+import SupplierDetail from './pages/admin/SupplierDetail';
 import MovementLogs from './pages/admin/MovementLogs';
 import UserProfile from './pages/admin/UserProfile';
 import WorkerDashboard from './pages/worker/WorkerDashboard';
@@ -51,6 +52,7 @@ function App() {
                 <Route path="/admin/products" element={<ProductCatalog />} />
                 <Route path="/admin/categories" element={<CategoryManager />} />
                 <Route path="/admin/suppliers" element={<SupplierManager />} />
+                <Route path="/admin/suppliers/:id" element={<SupplierDetail />} />
                 <Route path="/admin/inventory" element={<MovementLogs />} />
                 <Route path="/admin/profile" element={<UserProfile />} />
                 <Route path="/admin/search" element={<GlobalSearch />} />
