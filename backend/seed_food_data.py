@@ -7,7 +7,11 @@ from django.utils import timezone
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
-from core.models import User, Supplier, Category, Product, ProductLot, StockMovement
+from users.models import User
+from fornitori.models import Supplier
+from categorie.models import Category
+from prodotti.models import Product, ProductLot
+from movimenti.models import StockMovement
 
 def run():
     print("Clearing old data...")
@@ -15,11 +19,11 @@ def run():
     Supplier.objects.all().delete()
     Product.objects.all().delete()
 
-    admin_user = User.objects.filter(email='admin@example.com').first()
-    worker_user = User.objects.filter(email='worker@example.com').first()
+    admin_user = User.objects.filter(email='admin@storagehub.com').first()
+    worker_user = User.objects.filter(email='magazziniere@storagehub.com').first()
 
     if not admin_user or not worker_user:
-        print("Test users not found. Make sure to run the initial seed first.")
+        print("Test users not found. Please create admin@storagehub.com and magazziniere@storagehub.com first.")
         return
 
     print("Creating Categories...")
@@ -33,10 +37,10 @@ def run():
 
     print("Creating Suppliers...")
     suppliers = [
-        Supplier.objects.create(name='Latterie Padane SpA', contact_info='info@latteriepadane.it - 02 1234567'),
-        Supplier.objects.create(name='Salumificio Emiliano', contact_info='ordini@salumificioemiliano.it - 0521 987654'),
-        Supplier.objects.create(name='Mulino Bianco Srl', contact_info='forniture@mulinobianco.it - 06 555444'),
-        Supplier.objects.create(name='Cantine Riunite', contact_info='vino@cantineriunite.it - 045 112233')
+        Supplier.objects.create(name='Latterie Padane SpA', email='info@latteriepadane.it', phone='02 1234567'),
+        Supplier.objects.create(name='Salumificio Emiliano', email='ordini@salumificioemiliano.it', phone='0521 987654'),
+        Supplier.objects.create(name='Mulino Bianco Srl', email='forniture@mulinobianco.it', phone='06 555444'),
+        Supplier.objects.create(name='Cantine Riunite', email='vino@cantineriunite.it', phone='045 112233')
     ]
 
     print("Creating Products...")
