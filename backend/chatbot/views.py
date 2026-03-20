@@ -4,7 +4,12 @@ from rest_framework import status, permissions
 from django.conf import settings
 from prodotti.models import Product, ProductLot
 from django.db.models import Sum, Q
-import google.generativeai as genai
+
+try:
+    import google.genai as genai
+except ImportError:
+    from google import genai
+
 import json
 
 class ChatView(APIView):
@@ -40,12 +45,14 @@ class ChatView(APIView):
         if api_key:
             try:
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel(
-                    model_name="gemini-flash-latest",
-                    system_instruction=f"Sei l'assistente virtuale di StorageHub, un sistema di gestione magazzino premium. Rispondi in modo professionale ed efficace. Usa questo contesto per rispondere se pertinente: {inventory_context}"
+                model = genai.TextGenerationModel.from_pretrained("gemini-flash-latest")
+                prompt = (
+                    f"Sei l'assistente virtuale di StorageHub, un sistema di gestione magazzino premium. "
+                    f"Rispondi in modo professionale ed efficace. Usa questo contesto per rispondere se pertinente:\n{inventory_context}\n"
+                    f"Utente: {user_message}\nRisposta:"
                 )
-                
-                response = model.generate_content(user_message)
+
+                response = model.generate(prompt=prompt)
                 ai_reply = response.text
                 return Response({"reply": ai_reply})
             except Exception as e:
