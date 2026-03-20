@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { LayoutDashboard, Package, ArrowLeftRight, Users, LogOut, Search, Menu, X, Terminal, Tags, UserCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { apiServices } from '@/lib/api';
+import NotificationBell from './NotificationBell';
+import ChatWidget from './ChatWidget';
 
 export default function AdminLayout() {
   const navigate = useNavigate();
@@ -147,6 +149,10 @@ export default function AdminLayout() {
           </div>
           
           <div className="flex items-center gap-4">
+            <NotificationBell />
+            
+            <div className="h-8 w-px bg-slate-200 mx-2 hidden sm:block"></div>
+
             <Link 
               to="/admin/profile"
               className="group flex items-center gap-4 hover:bg-slate-50 p-2 pr-4 rounded-full transition-colors border border-transparent hover:border-slate-100"
@@ -174,6 +180,7 @@ export default function AdminLayout() {
           <Outlet />
         </main>
       </div>
+      <ChatWidget />
     </div>
   );
 }

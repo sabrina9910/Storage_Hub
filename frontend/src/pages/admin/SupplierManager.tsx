@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast';
 
 export default function SupplierManager() {
   const queryClient = useQueryClient();
-  const [expandedSupplier, setExpandedSupplier] = useState<number | null>(null);
+  const [expandedSupplier, setExpandedSupplier] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newSupplier, setNewSupplier] = useState({ name: '', contact_person: '', email: '', phone: '' });
 
@@ -33,16 +33,16 @@ export default function SupplierManager() {
     addMutation.mutate(newSupplier);
   };
 
-  const toggleExpand = (id: number) => {
+  const toggleExpand = (id: string) => {
     setExpandedSupplier(expandedSupplier === id ? null : id);
   };
 
-  const safeSuppliers = Array.isArray(suppliers) ? suppliers : [];
-  const safeProducts = Array.isArray(products) ? products : [];
-  const safeLots = Array.isArray(lots) ? lots : [];
+  const safeSuppliers = Array.isArray(suppliers?.results || suppliers) ? (suppliers?.results || suppliers) : [];
+  const safeProducts = Array.isArray(products?.results || products) ? (products?.results || products) : [];
+  const safeLots = Array.isArray(lots?.results || lots) ? (lots?.results || lots) : [];
 
   // Helper to get products for a supplier and their total stock
-  const getSupplierProducts = (supplierId: number) => {
+  const getSupplierProducts = (supplierId: string) => {
     const sProducts = safeProducts.filter(p => p.supplier === supplierId);
     return sProducts.map(p => {
       const totalStock = safeLots
