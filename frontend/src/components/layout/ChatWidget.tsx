@@ -10,6 +10,17 @@ interface Message {
   timestamp: Date;
 }
 
+// Helper function to format AI responses
+const formatAIResponse = (text: string) => {
+  return text
+    // Convert **bold** to <strong>
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    // Convert * list items to bullet points
+    .replace(/^\* (.+)$/gm, '• $1')
+    // Add line breaks for better readability
+    .replace(/\n/g, '<br />');
+};
+
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
@@ -101,7 +112,14 @@ export default function ChatWidget() {
                     ? "bg-primary text-white rounded-tr-none" 
                     : "bg-white border border-slate-100 text-slate-700 rounded-tl-none"
                 )}>
-                  {msg.text}
+                  {msg.sender === 'ai' ? (
+                    <div 
+                      className="whitespace-pre-wrap leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: formatAIResponse(msg.text) }}
+                    />
+                  ) : (
+                    msg.text
+                  )}
                 </div>
                 <span className="text-[10px] text-slate-400 mt-1 px-1">
                   {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
