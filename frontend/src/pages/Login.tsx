@@ -98,10 +98,10 @@ export default function Login() {
             <button
               type="button"
               disabled={isLoading}
-              onClick={() => handleQuickLogin('superuser@storagehub.com', 'super123')}
+              onClick={() => handleQuickLogin('superadmin@storagehub.com', 'super123')}
               className="text-xs font-medium py-2 px-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 transition-colors border border-purple-200 shadow-sm disabled:opacity-50"
             >
-              {isLoading ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : 'Superuser'}
+              {isLoading ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : 'Super Admin'}
             </button>
             <button
               type="button"
@@ -109,7 +109,7 @@ export default function Login() {
               onClick={() => handleQuickLogin('admin@storagehub.com', 'admin123')}
               className="text-xs font-medium py-2 px-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 transition-colors border border-blue-200 shadow-sm disabled:opacity-50"
             >
-              {isLoading ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : 'Amministratore'}
+              {isLoading ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : 'Admin'}
             </button>
             <button
               type="button"

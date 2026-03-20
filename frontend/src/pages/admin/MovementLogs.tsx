@@ -101,10 +101,10 @@ export default function MovementLogs() {
 
   const getMovementStyle = (type: string) => {
     switch (type) {
-      case 'IN': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-      case 'OUT': return 'bg-rose-100 text-rose-700 border-rose-200';
-      case 'RETURN': return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'QUARANTINE': return 'bg-amber-100 text-amber-700 border-amber-200';
+      case 'IN': return 'bg-green-100 text-green-700 border-green-200';
+      case 'OUT': return 'bg-red-100 text-red-700 border-red-200';
+      case 'RETURN': return 'bg-orange-100 text-orange-700 border-orange-200';
+      case 'QUARANTINE': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
       default: return 'bg-slate-100 text-slate-700 border-slate-200';
     }
   };
@@ -127,13 +127,12 @@ export default function MovementLogs() {
       label: 'Tipo Movimento',
       options: [
         { value: 'ALL', label: 'Tutti' },
-        { value: 'IN', label: 'Entrata (IN)' },
-        { value: 'OUT', label: 'Uscita (OUT)' },
-        { value: 'RETURN', label: 'Reso (RETURN)' },
+        { value: 'IN', label: 'IN' },
+        { value: 'OUT', label: 'OUT' },
+        { value: 'RETURN', label: 'RESO' },
         { 
           value: 'QUARANTINE', 
-          label: 'Quarantena (QUARANTINE)',
-          hidden: currentUser?.role === 'magazziniere' && !currentUser?.is_superuser 
+          label: 'QUARANTENA'
         }
       ]
     },
@@ -152,7 +151,7 @@ export default function MovementLogs() {
       <div className="flex justify-between items-end mb-8">
         <div>
           <h2 className="text-3xl font-black text-slate-800 tracking-tight">Registro Movimenti</h2>
-          <p className="text-slate-500 font-medium mt-1">Audit trail e storico dettagliato delle operazioni di magazzino.</p>
+          <p className="text-slate-500 font-medium mt-1">Traccia le entrate e uscite fisiche dei prodotti dal magazzino</p>
         </div>
       </div>
           {/* Filters Toolbar */}

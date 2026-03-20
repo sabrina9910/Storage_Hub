@@ -61,12 +61,12 @@ export default function AuditLog() {
 
   const getActionColor = (action: string) => {
     const colors: Record<string, string> = {
-      'STOCK_IN': 'bg-emerald-100 text-emerald-700 border-emerald-200',
-      'STOCK_OUT': 'bg-rose-100 text-rose-700 border-rose-200',
-      'BLACKLISTED': 'bg-slate-100 text-slate-700 border-slate-200',
-      'RESTORED': 'bg-blue-100 text-blue-700 border-blue-200',
-      'QUARANTINED': 'bg-amber-100 text-amber-700 border-amber-200',
-      'ORDER_CREATED': 'bg-purple-100 text-purple-700 border-purple-200',
+      'STOCK_IN': 'bg-green-100 text-green-700 border-green-200',
+      'STOCK_OUT': 'bg-red-100 text-red-700 border-red-200',
+      'BLACKLISTED': 'bg-black text-white border-black',
+      'RESTORED': 'bg-green-800 text-white border-green-800',
+      'QUARANTINED': 'bg-yellow-100 text-yellow-700 border-yellow-200',
+      'ORDER_CREATED': 'bg-blue-100 text-blue-700 border-blue-200',
     };
     return colors[action] || 'bg-slate-100 text-slate-700 border-slate-200';
   };
@@ -75,9 +75,9 @@ export default function AuditLog() {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-black text-slate-800 tracking-tight">Audit Log</h1>
+          <h1 className="text-4xl font-black text-slate-800 tracking-tight">Registro di Sistema</h1>
           <p className="text-slate-500 font-medium mt-1">
-            Tracciamento completo di tutte le azioni
+            Storico completo delle operazioni amministrative e di sicurezza
           </p>
         </div>
         <div className="px-4 py-2 bg-indigo-100 border border-indigo-200 rounded-xl">

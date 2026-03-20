@@ -64,12 +64,12 @@ export default function AdminLayout() {
     );
   }
 
-  // Admin specific items (both amministratore and superuser have same permissions)
-  if (currentUser?.is_superuser || currentUser?.role === 'amministratore') {
+  // Admin ONLY items - completely hidden for Worker and Manager
+  if (currentUser?.role === 'amministratore' || currentUser?.is_superuser) {
     navItems.push(
       { name: 'System Logs', to: '/admin/system', icon: Terminal },
       { name: 'Blacklist', to: '/admin/blacklist', icon: Ban },
-      { name: 'Audit Log', to: '/admin/audit-log', icon: FileText }
+      { name: 'Registro di Sistema', to: '/admin/audit-log', icon: FileText }
     );
   }
 
