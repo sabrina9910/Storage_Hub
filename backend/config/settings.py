@@ -61,6 +61,8 @@ INSTALLED_APPS = [
     'fornitori',
     'prodotti',
     'movimenti',
+    'alert_report',
+    'chatbot',
     'auditlog',
 ]
 
@@ -167,3 +169,6 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'AUTHORIZATION_HEADER_TYPES': ('Bearer',),
 }
+# Chatbot Configuration
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')

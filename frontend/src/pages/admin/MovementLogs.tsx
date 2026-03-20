@@ -29,10 +29,10 @@ export default function MovementLogs() {
 
   const isLoading = mLoading || lLoading || pLoading || uLoading;
 
-  const safeMovements = Array.isArray(movements) ? movements : [];
-  const safeLots = Array.isArray(lots) ? lots : [];
-  const safeProducts = Array.isArray(products) ? products : [];
-  const safeUsers = Array.isArray(users) ? users : [];
+  const safeMovements = Array.isArray(movements?.results || movements) ? (movements?.results || movements) : [];
+  const safeLots = Array.isArray(lots?.results || lots) ? (lots?.results || lots) : [];
+  const safeProducts = Array.isArray(products?.results || products) ? (products?.results || products) : [];
+  const safeUsers = Array.isArray(users?.results || users) ? (users?.results || users) : [];
 
   // Enriched Data combining relations
   const enrichedMovements = useMemo(() => {

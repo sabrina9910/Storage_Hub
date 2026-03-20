@@ -18,7 +18,7 @@ export default function ProductCreateModal({ onClose }: ProductCreateModalProps)
     unit_of_measure: 'pz',
     unit_price: '0.00',
     min_stock_threshold: '10',
-    suppliers: [] as number[],
+    suppliers: [] as string[],
   });
 
   const { data: categories } = useQuery({ queryKey: ['categories'], queryFn: apiServices.getCategories });
@@ -49,7 +49,7 @@ export default function ProductCreateModal({ onClose }: ProductCreateModalProps)
     // Convert for API
     const pData = {
       ...formData,
-      category: parseInt(formData.category),
+      // category is already a UUID string, no need for parseInt
       unit_price: parseFloat(formData.unit_price),
       min_stock_threshold: parseInt(formData.min_stock_threshold),
     };
@@ -57,7 +57,7 @@ export default function ProductCreateModal({ onClose }: ProductCreateModalProps)
     createMutation.mutate(pData);
   };
 
-  const toggleSupplier = (id: number) => {
+  const toggleSupplier = (id: string) => {
     setFormData(prev => {
       const isSelected = prev.suppliers.includes(id);
       if (isSelected) {

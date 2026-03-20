@@ -23,8 +23,8 @@ export default function WorkerDashboard() {
     queryFn: () => apiServices.getMovements(),
   });
 
-  const movementsList = movements?.results || movements || [];
-  const myMovements = Array.isArray(movementsList) ? movementsList.filter((m: any) => m.user === user?.id) : [];
+  const safeMovements = Array.isArray(movements?.results || movements) ? (movements?.results || movements) : [];
+  const myMovements = safeMovements.filter((m: any) => m.user === user?.id);
   const todayMovements = myMovements.filter((m: any) => new Date(m.timestamp).toDateString() === new Date().toDateString());
 
   return (

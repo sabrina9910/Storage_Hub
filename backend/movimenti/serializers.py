@@ -13,21 +13,7 @@ class StockMovementSerializer(serializers.ModelSerializer):
     class Meta:
         model = StockMovement
         fields = '__all__'
-        read_only_fields = ['timestamp', 'user_full_name', 'user_email', 'user_role']
-    
-    def get_product_name(self, obj):
-        if obj.product:
-            return obj.product.name
-        elif obj.lot:
-            return obj.lot.product.name
-        return 'N/A'
-    
-    def get_product_sku(self, obj):
-        if obj.product:
-            return obj.product.sku
-        elif obj.lot:
-            return obj.lot.product.sku
-        return 'N/A'
+        read_only_fields = ['timestamp', 'user']
 
     def create(self, validated_data):
         movement_type = validated_data.get('movement_type')

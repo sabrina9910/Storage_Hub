@@ -56,10 +56,8 @@ class ProductViewSet(viewsets.ModelViewSet):
         
         # Show all products for superuser
         if getattr(user, 'is_superuser', False):
-            return Product.objects.all()
-        
-        # For regular users, hide blacklisted products from standard views
-        return Product.objects.filter(is_active=True, is_blacklisted=False)
+            return Product.objects.all().select_related('category').prefetch_related('suppliers')
+        return Product.objects.filter(is_active=True).select_related('category').prefetch_related('suppliers')
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -317,9 +315,9 @@ class ProductLotViewSet(viewsets.ModelViewSet):
             return ProductLot.objects.none()
             
         if getattr(user, 'is_superuser', False):
-            qs = ProductLot.objects.all()
+            qs = ProductLot.objects.all().select_related('product')
         else:
-            qs = ProductLot.objects.filter(is_active=True)
+            qs = ProductLot.objects.filter(is_active=True).select_related('product')
             
         return qs.order_by('expiration_date')
 

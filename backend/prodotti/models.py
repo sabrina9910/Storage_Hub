@@ -12,7 +12,7 @@ class Product(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='owned_products')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='products')
-    suppliers = models.ManyToManyField(Supplier, related_name='products')
+    suppliers = models.ManyToManyField(Supplier, related_name='products', blank=True)
     sku = models.CharField(max_length=100, unique=True)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)

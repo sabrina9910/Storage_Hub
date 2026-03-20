@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useState, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiServices } from '@/lib/api';
-import { PackageOpen, Edit2, Layers, Trash2, CheckCircle2, ChevronDown, ChevronUp, Thermometer, Info, Plus } from 'lucide-react';
+import { PackageOpen, Edit2, Layers, Trash2, CheckCircle2, ChevronDown, ChevronUp, Thermometer, Info, Plus, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'react-hot-toast';
 import LotManagerModal from '@/components/admin/LotManagerModal';
@@ -13,6 +13,8 @@ import { useDebounce } from '@/hooks/useDebounce';
 
 export default function ProductCatalog() {
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const skuFilter = searchParams.get('sku');
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
@@ -58,56 +60,64 @@ export default function ProductCatalog() {
     setExpandedRows(prev => prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]);
   };
 
-  if (pLoading || lLoading) return <div className="p-8 text-slate-500">Caricamento Catalogo...</div>;
-
   const safeProducts = Array.isArray(products?.results || products) ? (products?.results || products) : [];
   const safeLots = Array.isArray(lots?.results || lots) ? (lots?.results || lots) : [];
   const safeCats = Array.isArray(categories?.results || categories) ? (categories?.results || categories) : [];
 
-  const enrichedProducts = safeProducts.map((p:any) => {
-    const productLots = safeLots.filter((l:any) => l.product === p.id);
-    const totalQty = productLots.reduce((sum:number, lot:any) => sum + lot.current_quantity, 0);    return { 
-      ...p, 
-      totalQty, 
-      productLots,
-      name: p.name, 
-      catName: categories?.results?.find((c:any) => c.id === p.category)?.name || 'N/D',
-      allergens: [], 
-      temp: p.description?.includes('Frigo') ? 'Frigo' : 'Ambiente'
-    };
-  });
-  const filterGroups = [
-    {
-      id: 'category',
-      label: 'Categoria',
-      options: [
-        { value: 'ALL', label: 'Tutte le categorie' },
-        ...(safeCats.map((c: any) => ({ value: c.id.toString(), label: c.name })))
-      ]
-    },
-    {
-      id: 'status',
-      label: 'Stato Prodotto',
-      options: [
-        { value: 'ALL', label: 'Qualsiasi stato' },
-        { value: 'ACTIVE', label: 'Solo Attivi' },
-        { value: 'LOW_STOCK', label: 'In Esaurimento (Sotto scorta media)' },
-        { 
-          value: 'QUARANTINE', 
-          label: 'In Quarantena', 
-          hidden: currentUser?.role === 'magazziniere' && !currentUser?.is_superuser
-        }
-      ]
-    }
-  ];
+  // Optimization: Group lots by product ID
+  const lotsByProduct = useMemo(() => {
+    const map = new Map();
+    safeLots.forEach((lot: any) => {
+      if (!map.has(lot.product)) map.set(lot.product, []);
+      map.get(lot.product).push(lot);
+    });
+    return map;
+  }, [safeLots]);
 
+  // Optimization: Map categories by ID
+  const categoryMap = useMemo(() => {
+    const map = new Map();
+    safeCats.forEach((cat: any) => map.set(cat.id, cat.name));
+    return map;
+  }, [safeCats]);
+
+  const enrichedProducts = useMemo(() => {
+    return safeProducts
+      .map((p: any) => {
+        const productLots = lotsByProduct.get(p.id) || [];
+        const totalQty = productLots.reduce((sum: number, lot: any) => sum + lot.current_quantity, 0);
+        return {
+          ...p,
+          totalQty,
+          productLots,
+          catName: categoryMap.get(p.category) || 'N/D',
+          allergens: [],
+          temp: p.description?.includes('Frigo') ? 'Frigo' : 'Ambiente'
+        };
+      })
+      .filter((p: any) => !skuFilter || p.sku.toLowerCase().includes(skuFilter.toLowerCase()));
+  }, [safeProducts, lotsByProduct, categoryMap, skuFilter]);
+
+  if (pLoading || lLoading || cLoading) return <div className="p-8 text-slate-500">Caricamento Catalogo...</div>;
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 relative z-40">
         <div>
-          <h2 className="text-3xl font-black text-slate-800 tracking-tight">Catalogo Prodotti</h2>
-          <p className="text-slate-500 font-medium mt-1">Gestione anagrafica e lotti inventario.</p>
+          <h2 className="text-3xl font-black text-slate-800 tracking-tight">
+            {skuFilter ? `Risultato per SKU: ${skuFilter}` : 'Catalogo Prodotti'}
+          </h2>
+          <p className="text-slate-500 font-medium mt-1">
+            {skuFilter ? 'Visualizzazione filtrata dalla notifica.' : 'Gestione anagrafica e lotti inventario.'}
+          </p>
+          {skuFilter && (
+            <button 
+              onClick={() => setSearchParams({})}
+              className="mt-2 text-xs font-bold text-primary flex items-center gap-1 hover:underline group"
+            >
+              <X size={14} className="group-hover:rotate-90 transition-transform" /> Rimuovi filtro
+            </button>
+          )}
         </div>
         <div className="flex items-center gap-4 w-full md:w-auto">
           <div className="w-full md:w-80 h-12 flex items-center">
