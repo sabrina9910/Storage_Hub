@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Package, Clock, ShieldAlert, FileText, Layers, AlertCircle, TrendingDown, TrendingUp, Download } from 'lucide-react';
+import { ArrowLeft, Package, Clock, ShieldAlert, FileText, Layers, AlertCircle, TrendingDown, TrendingUp, Download, Ban } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiServices } from '@/lib/api';
 import QuarantineModal from '@/components/admin/QuarantineModal';
+import BlacklistModal from '@/components/admin/BlacklistModal';
 import { cn } from '@/lib/utils';
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const [isQuarantineModalOpen, setIsQuarantineModalOpen] = useState(false);
+  const [isBlacklistModalOpen, setIsBlacklistModalOpen] = useState(false);
 
   const { data: product, isLoading: pLoading, isError: pError } = useQuery({
     queryKey: ['product', id],
@@ -41,9 +43,29 @@ export default function ProductDetail() {
     }
   });
 
+  const blacklistMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) => 
+      apiServices.blacklistProduct(id, { reason }),
+    onSuccess: () => {
+      setIsBlacklistModalOpen(false);
+      toast.success('Prodotto aggiunto alla blacklist!');
+      queryClient.invalidateQueries({ queryKey: ['product', id] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+    onError: (err: any) => {
+      toast.error(err.message || 'Errore durante la blacklist');
+    }
+  });
+
   const handleQuarantine = () => {
     if (id) {
       quarantineMutation.mutate(id);
+    }
+  };
+
+  const handleBlacklist = (reason: string) => {
+    if (id) {
+      blacklistMutation.mutate({ id, reason });
     }
   };
 
@@ -320,14 +342,25 @@ export default function ProductDetail() {
              <p className="text-sm font-medium text-slate-500 mb-5 leading-relaxed">
                Blocca la movimentazione di questo prodotto in caso di difetti segnalati.
              </p>
-             <button 
-               onClick={() => setIsQuarantineModalOpen(true)}
-               disabled={product.status === 'QUARANTINE'}
-               className="w-full py-3 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200 transition-all duration-300 rounded-xl font-bold flex items-center justify-center gap-2 group shadow-sm active:scale-95 disabled:opacity-50 disabled:hover:bg-rose-50 disabled:hover:text-rose-600 disabled:cursor-not-allowed"
-             >
-               <ShieldAlert size={18} className="group-hover:animate-pulse" />
-               {product.status === 'QUARANTINE' ? 'Già in Quarantena' : 'Metti in Quarantena'}
-             </button>
+             <div className="space-y-3">
+               <button 
+                 onClick={() => setIsQuarantineModalOpen(true)}
+                 disabled={product.status === 'QUARANTINE'}
+                 className="w-full py-3 bg-amber-50 hover:bg-amber-600 text-amber-600 hover:text-white border border-amber-200 transition-all duration-300 rounded-xl font-bold flex items-center justify-center gap-2 group shadow-sm active:scale-95 disabled:opacity-50 disabled:hover:bg-amber-50 disabled:hover:text-amber-600 disabled:cursor-not-allowed"
+               >
+                 <ShieldAlert size={18} className="group-hover:animate-pulse" />
+                 {product.status === 'QUARANTINE' ? 'Già in Quarantena' : 'Metti in Quarantena'}
+               </button>
+               
+               <button 
+                 onClick={() => setIsBlacklistModalOpen(true)}
+                 disabled={product.is_blacklisted}
+                 className="w-full py-3 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200 transition-all duration-300 rounded-xl font-bold flex items-center justify-center gap-2 group shadow-sm active:scale-95 disabled:opacity-50 disabled:hover:bg-rose-50 disabled:hover:text-rose-600 disabled:cursor-not-allowed"
+               >
+                 <Ban size={18} className="group-hover:animate-pulse" />
+                 {product.is_blacklisted ? 'Già in Blacklist' : 'Metti in Blacklist'}
+               </button>
+             </div>
           </div>
         </div>
       </div>
@@ -337,6 +370,13 @@ export default function ProductDetail() {
         onClose={() => !quarantineMutation.isPending && setIsQuarantineModalOpen(false)}
         onConfirm={handleQuarantine}
         isPending={quarantineMutation.isPending}
+      />
+      
+      <BlacklistModal 
+        isOpen={isBlacklistModalOpen}
+        onClose={() => !blacklistMutation.isPending && setIsBlacklistModalOpen(false)}
+        onConfirm={handleBlacklist}
+        isPending={blacklistMutation.isPending}
       />
     </div>
   );

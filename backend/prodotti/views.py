@@ -52,10 +52,13 @@ class ProductViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if not user or not user.is_authenticated:
             return Product.objects.none()
-            
+        
+        # Show all products for superuser
         if getattr(user, 'is_superuser', False):
             return Product.objects.all()
-        return Product.objects.filter(is_active=True)
+        
+        # For regular users, hide blacklisted products from standard views
+        return Product.objects.filter(is_active=True, is_blacklisted=False)
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -255,6 +258,47 @@ class ProductViewSet(viewsets.ModelViewSet):
         elements.append(table)
         doc.build(elements)
         return response
+
+    @action(detail=True, methods=['patch'], url_path='blacklist')
+    def blacklist(self, request, pk=None):
+        from core.permissions import IsAmministratore
+        self.permission_classes = [IsAmministratore]
+        self.check_permissions(request)
+        
+        product = self.get_object()
+        reason = request.data.get('reason', '')
+        
+        product.is_blacklisted = True
+        product.blacklist_reason = reason
+        product.save()
+        
+        serializer = self.get_serializer(product)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['patch'], url_path='restore')
+    def restore(self, request, pk=None):
+        from core.permissions import IsAmministratore
+        self.permission_classes = [IsAmministratore]
+        self.check_permissions(request)
+        
+        product = self.get_object()
+        
+        product.is_blacklisted = False
+        product.blacklist_reason = ''
+        product.save()
+        
+        serializer = self.get_serializer(product)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], url_path='blacklisted')
+    def blacklisted(self, request):
+        from core.permissions import IsAmministratore
+        self.permission_classes = [IsAmministratore]
+        self.check_permissions(request)
+        
+        blacklisted_products = Product.objects.filter(is_blacklisted=True)
+        serializer = self.get_serializer(blacklisted_products, many=True)
+        return Response(serializer.data)
 
 class ProductLotViewSet(viewsets.ModelViewSet):
     serializer_class = ProductLotSerializer
