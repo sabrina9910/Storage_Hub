@@ -30,7 +30,7 @@ class Product(models.Model):
 
 class ProductLot(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='lots')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='lots', null=True, blank=True)
     lot_number = models.CharField(max_length=100)
     expiration_date = models.DateField()
     current_quantity = models.IntegerField(default=0)

@@ -1,9 +1,5 @@
 from django.core.management.base import BaseCommand
-from users.models import User  # o CustomUser, a seconda di come l'avete chiamato
-from fornitori.models import Supplier
-from categorie.models import Category
-from prodotti.models import Product, ProductLot
-from movimenti.models import StockMovement
+from users.models import User
 
 class Command(BaseCommand):
     help = 'Create test users with different roles'
@@ -25,8 +21,7 @@ class Command(BaseCommand):
             {
                 'email': 'manager@example.com',
                 'password': 'password123',
-                'is_admin': True,
-                'is_warehouse_worker': False,
+                'role': 'amministratore',
                 'role_name': 'Manager'
             }
         ]
@@ -40,6 +35,7 @@ class Command(BaseCommand):
             else:
                 self.stdout.write(self.style.WARNING(f'Updating permissions for {data["role_name"]}: {email}'))
             
-            user.is_admin = data['is_admin']
-            user.is_warehouse_worker = data['is_warehouse_worker']
+            user.role = data['role']
             user.save()
+        
+        self.stdout.write(self.style.SUCCESS('Users seeded successfully'))
