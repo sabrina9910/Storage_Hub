@@ -46,7 +46,7 @@ export default function AdminLayout() {
     if (currentUser?.role === 'magazziniere' && !currentUser?.is_superuser) {
         navItems.push(
             { name: 'My Workspace', to: '/magazziniere/dashboard', icon: LayoutDashboard },
-            { name: 'Wizard Movimenti', to: '/magazziniere/movement', icon: ArrowLeftRight }
+            { name: 'Operazioni Magazzino', to: '/magazziniere/movement', icon: ArrowLeftRight }
         );
     } else {
         navItems.push(
