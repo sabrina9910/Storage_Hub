@@ -4,7 +4,7 @@ import { apiServices } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 interface ProtectedRouteProps {
-  requiredRole?: 'amministratore' | 'magazziniere' | 'superuser';
+  requiredRole?: 'amministratore' | 'magazziniere';
 }
 
 export default function ProtectedRoute({ requiredRole }: ProtectedRouteProps) {
@@ -37,11 +37,6 @@ export default function ProtectedRoute({ requiredRole }: ProtectedRouteProps) {
 
   if (requiredRole === 'magazziniere' && user.role !== 'magazziniere' && user.role !== 'amministratore' && !user.is_superuser) {
     toast.error('Accesso Negato: Richiesto livello Operatore.');
-    return <Navigate to="/admin/dashboard" replace />;
-  }
-
-  if (requiredRole === 'superuser' && !user.is_superuser) {
-    toast.error('Accesso Negato: Richiesto livello di Sistema (God Mode).');
     return <Navigate to="/admin/dashboard" replace />;
   }
 

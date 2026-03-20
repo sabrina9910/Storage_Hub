@@ -66,7 +66,7 @@ function App() {
                 <Route path="/magazziniere/movement" element={<DesktopMovementWizard />} />
               </Route>
 
-              {/* Strict Admin Routes */}
+              {/* Admin Routes - accessible by both amministratore and superuser */}
               <Route element={<ProtectedRoute requiredRole="amministratore" />}>
                 <Route path="/admin/dashboard" element={<DashboardAdmin />} />
                 <Route path="/admin/active-products" element={<ActiveProductsList />} />
@@ -78,10 +78,6 @@ function App() {
                 <Route path="/admin/inventory-value" element={<InventoryValue />} />
                 <Route path="/admin/at-risk-lots" element={<AtRiskLots />} />
                 <Route path="/admin/products/:id" element={<ProductDetail />} />
-              </Route>
-              
-              {/* God Mode Route */}
-              <Route element={<ProtectedRoute requiredRole="superuser" />}>
                 <Route path="/admin/system" element={<SystemLogs />} />
               </Route>
             </Route>

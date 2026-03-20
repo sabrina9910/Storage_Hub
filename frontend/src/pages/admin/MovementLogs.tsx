@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiServices } from '@/lib/api';
-import { Filter, ArrowDownUp, Package, History, ArrowRight, ArrowLeft, RefreshCw, AlertTriangle, Terminal, Database, Activity } from 'lucide-react';
+import { Filter, ArrowDownUp, Package, History, ArrowRight, ArrowLeft, RefreshCw, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, subDays, isAfter } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -10,7 +10,6 @@ import FilterPanel from '@/components/common/FilterPanel';
 import { useDebounce } from '@/hooks/useDebounce';
 
 export default function MovementLogs() {
-  const [isGodMode, setIsGodMode] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState<Record<string, string>>({ date: 'all', type: 'ALL', user: 'ALL' });
   const debouncedSearch = useDebounce(searchTerm, 500);
@@ -155,48 +154,7 @@ export default function MovementLogs() {
           <h2 className="text-3xl font-black text-slate-800 tracking-tight">Registro Movimenti</h2>
           <p className="text-slate-500 font-medium mt-1">Audit trail e storico dettagliato delle operazioni di magazzino.</p>
         </div>
-        {currentUser?.is_superuser && (
-          <button 
-            onClick={() => setIsGodMode(!isGodMode)}
-            className={cn(
-              "px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-all shadow-sm active:scale-95",
-              isGodMode ? "bg-slate-800 text-green-400 border border-slate-700 hover:bg-slate-900" : "bg-white text-slate-400 border border-slate-200 hover:text-slate-800"
-            )}
-          >
-            <Terminal size={18} />
-            {isGodMode ? 'Exit God Mode' : 'God Mode'}
-          </button>
-        )}
       </div>
-
-      {isGodMode ? (
-        <div className="bg-slate-900 rounded-2xl p-6 shadow-2xl border border-slate-800 font-mono text-sm overflow-hidden flex flex-col h-[70vh] animate-in zoom-in-95 duration-300">
-          <div className="flex items-center justify-between mb-4 border-b border-slate-800 pb-4">
-            <div className="flex items-center gap-4">
-              <span className="text-green-500 font-bold flex items-center gap-2"><Activity size={16} /> SYS_OK</span>
-              <span className="text-slate-500">|</span>
-              <span className="text-blue-400 font-bold flex items-center gap-2"><Database size={16} /> PostgreSQL</span>
-              <span className="text-slate-500">|</span>
-              <span className="text-amber-500 font-bold">Latency: {Math.floor(Math.random() * 30 + 10)}ms</span>
-            </div>
-            <div className="text-slate-600 text-xs text-right">ROOT PRIVILEGES GRANTED</div>
-          </div>
-          <div className="flex-1 overflow-y-auto custom-scrollbar pr-4 text-slate-300 space-y-2">
-            <div><span className="text-fuchsia-400">root@storagehub</span>:<span className="text-blue-400">/var/log/movements</span>$ tail -n 50 audit.log</div>
-            {enrichedMovements.slice(0, 50).map((m: any, i: number) => (
-              <div key={m.id} className="border-l-2 border-slate-800 pl-4 py-1 hover:bg-white/5 transition-colors">
-                <span className="text-slate-500">[{m.timestamp}]</span>{' '}
-                <span className={m.movement_type === 'QUARANTINE' ? "text-rose-400 font-bold" : "text-emerald-400"}>[{m.movement_type}]</span>{' '}
-                <span className="text-cyan-400">USER_ID:{m.user} ({m.user_email})</span>{' '}
-                <span>ACTION: {m.quantity > 0 ? '+' : ''}{m.quantity} {m.unit_of_measure} on LOT:{m.lot} (SKU:{m.sku})</span>
-                {m.movement_type === 'QUARANTINE' && <div className="text-rose-500 text-xs mt-1 ml-4 block">↳ CRITICAL: Item flagged for QA inspection. Auto-removed from available stock pool.</div>}
-              </div>
-            ))}
-            <div className="animate-pulse text-green-500 mt-4">_</div>
-          </div>
-        </div>
-      ) : (
-        <>
           {/* Filters Toolbar */}
       <div className="glass-card mb-6 p-4 relative z-40">
         <div className="flex flex-col md:flex-row md:items-center gap-4">
@@ -295,8 +253,6 @@ export default function MovementLogs() {
           </div>
         </div>
       </div>
-      </>
-      )}
     </div>
   );
 }

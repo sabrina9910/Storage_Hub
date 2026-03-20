@@ -64,16 +64,10 @@ export default function AdminLayout() {
     );
   }
 
-  // God Mode and Admin specific items
+  // Admin specific items (both amministratore and superuser have same permissions)
   if (currentUser?.is_superuser || currentUser?.role === 'amministratore') {
     navItems.push(
-      { name: 'System Logs', to: '/admin/system', icon: Terminal }
-    );
-  }
-
-  // Admin/Manager specific items
-  if (currentUser?.role === 'amministratore' || currentUser?.is_superuser) {
-    navItems.push(
+      { name: 'System Logs', to: '/admin/system', icon: Terminal },
       { name: 'Blacklist', to: '/admin/blacklist', icon: Ban },
       { name: 'Audit Log', to: '/admin/audit-log', icon: FileText }
     );
