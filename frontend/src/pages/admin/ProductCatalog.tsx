@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiServices } from '@/lib/api';
 import { PackageOpen, Edit2, Layers, Trash2, CheckCircle2, ChevronDown, ChevronUp, Thermometer, Info, Plus, X } from 'lucide-react';
@@ -18,7 +18,6 @@ export default function ProductCatalog() {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
-  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
   const debouncedSearch = useDebounce(searchTerm, 500);
   const [filters, setFilters] = useState<Record<string, string>>({ category: 'ALL', status: 'ALL' });
@@ -97,6 +96,23 @@ export default function ProductCatalog() {
       })
       .filter((p: any) => !skuFilter || p.sku.toLowerCase().includes(skuFilter.toLowerCase()));
   }, [safeProducts, lotsByProduct, categoryMap, skuFilter]);
+
+  const filterGroups = [
+    {
+      id: 'category',
+      label: 'Categoria',
+      options: [{ value: 'ALL', label: 'Tutte' }, ...safeCats.map((c: any) => ({ value: c.id, label: c.name }))]
+    },
+    {
+      id: 'status',
+      label: 'Stato',
+      options: [
+        { value: 'ALL', label: 'Tutti' },
+        { value: 'active', label: 'Attivi' },
+        { value: 'inactive', label: 'Inattivi' }
+      ]
+    }
+  ];
 
   if (pLoading || lLoading || cLoading) return <div className="p-8 text-slate-500">Caricamento Catalogo...</div>;
 
