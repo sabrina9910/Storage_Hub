@@ -11,7 +11,7 @@ class StockMovementSerializer(serializers.ModelSerializer):
     class Meta:
         model = StockMovement
         fields = '__all__'
-        read_only_fields = ['timestamp']
+        read_only_fields = ['timestamp', 'user']
 
     def create(self, validated_data):
         movement_type = validated_data.get('movement_type')

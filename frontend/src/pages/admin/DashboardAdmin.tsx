@@ -19,9 +19,9 @@ export default function DashboardAdmin() {
   }
 
   // Calculate KPIs
-  const safeProducts = Array.isArray(products) ? products : [];
-  const safeLots = Array.isArray(lots) ? lots : [];
-  const safeMovements = Array.isArray(movements) ? movements : [];
+  const safeProducts = Array.isArray(products?.results || products) ? (products?.results || products) : [];
+  const safeLots = Array.isArray(lots?.results || lots) ? (lots?.results || lots) : [];
+  const safeMovements = Array.isArray(movements?.results || movements) ? (movements?.results || movements) : [];
 
   let inventoryValue = 0;
   let activeProducts = safeProducts.length;

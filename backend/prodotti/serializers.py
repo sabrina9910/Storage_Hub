@@ -10,6 +10,7 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
+        read_only_fields = ('owner',)
 
 class ProductLotSerializer(serializers.ModelSerializer):
     product_detail = ProductSerializer(source='product', read_only=True)

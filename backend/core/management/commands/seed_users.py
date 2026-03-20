@@ -27,7 +27,7 @@ class Command(BaseCommand):
             {
                 'email': 'manager@example.com',
                 'password': 'password123',
-                'is_admin': False,
+                'is_admin': True,
                 'is_warehouse_worker': False,
                 'role_name': 'Manager'
             }
@@ -35,14 +35,13 @@ class Command(BaseCommand):
 
         for data in users_data:
             email = data['email']
-            if not User.objects.filter(email=email).exists():
-                user = User.objects.create_user(
-                    email=email,
-                    password=data['password']
-                )
-                user.is_admin = data['is_admin']
-                user.is_warehouse_worker = data['is_warehouse_worker']
-                user.save()
-                self.stdout.write(self.style.SUCCESS(f'Successfully created {data["role_name"]} user: {email}'))
+            user, created = User.objects.get_or_create(email=email)
+            if created:
+                user.set_password(data['password'])
+                self.stdout.write(self.style.SUCCESS(f'Created {data["role_name"]} user: {email}'))
             else:
-                self.stdout.write(self.style.WARNING(f'User {email} already exists'))
+                self.stdout.write(self.style.WARNING(f'Updating permissions for {data["role_name"]}: {email}'))
+            
+            user.is_admin = data['is_admin']
+            user.is_warehouse_worker = data['is_warehouse_worker']
+            user.save()

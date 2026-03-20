@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast';
 export default function CategoryManager() {
   const queryClient = useQueryClient();
   const [isAdding, setIsAdding] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: '', description: '' });
 
   const { data: categories, isLoading } = useQuery({ 
@@ -27,7 +27,7 @@ export default function CategoryManager() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number, data: any }) => apiServices.updateCategory(id, data),
+    mutationFn: ({ id, data }: { id: string, data: any }) => apiServices.updateCategory(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       toast.success('Categoria aggiornata');
@@ -37,7 +37,7 @@ export default function CategoryManager() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiServices.deleteCategory(id),
+    mutationFn: (id: string) => apiServices.deleteCategory(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       toast.success('Categoria eliminata');
@@ -60,7 +60,7 @@ export default function CategoryManager() {
     setIsAdding(true);
   };
 
-  const handleDelete = (id: number, name: string) => {
+  const handleDelete = (id: string, name: string) => {
     if (window.confirm(`Sei sicuro di voler eliminare la categoria "${name}"?`)) {
       deleteMutation.mutate(id);
     }
