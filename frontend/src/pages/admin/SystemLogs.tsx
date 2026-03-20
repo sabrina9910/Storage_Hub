@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiServices } from '@/lib/api';
-import { Users, Activity, Plus, X, Save, Shield, Mail, User, Phone } from 'lucide-react';
+import { Users, Activity, Plus, X, Save, Shield, Mail, User, Phone, Edit2, Trash2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 export default function SystemLogs() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'users' | 'logs'>('users');
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+  const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<any>(null);
   const [newUser, setNewUser] = useState({
     email: '',
     first_name: '',
@@ -39,6 +41,26 @@ export default function SystemLogs() {
     onError: () => toast.error('Errore durante la creazione dell\'utente'),
   });
 
+  const updateUserMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => apiServices.updateUser(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast.success('Utente aggiornato con successo');
+      setIsEditUserModalOpen(false);
+      setEditingUser(null);
+    },
+    onError: () => toast.error('Errore durante l\'aggiornamento dell\'utente'),
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: apiServices.deleteUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast.success('Utente eliminato con successo');
+    },
+    onError: () => toast.error('Errore durante l\'eliminazione dell\'utente'),
+  });
+
   const handleCreateUser = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUser.email || !newUser.password) {
@@ -46,6 +68,34 @@ export default function SystemLogs() {
       return;
     }
     createUserMutation.mutate(newUser);
+  };
+
+  const handleEditUser = (user: any) => {
+    setEditingUser({
+      id: user.id,
+      email: user.email,
+      first_name: user.first_name || '',
+      last_name: user.last_name || '',
+      phone: user.phone || '',
+      role: user.role,
+    });
+    setIsEditUserModalOpen(true);
+  };
+
+  const handleUpdateUser = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser.email) {
+      toast.error('Email è obbligatoria');
+      return;
+    }
+    const { id, ...data } = editingUser;
+    updateUserMutation.mutate({ id, data });
+  };
+
+  const handleDeleteUser = (userId: string) => {
+    if (window.confirm('Sei sicuro di voler eliminare questo utente?')) {
+      deleteUserMutation.mutate(userId);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -118,6 +168,7 @@ export default function SystemLogs() {
                     <th className="text-left p-4 text-xs font-black text-slate-500 uppercase tracking-wider">Email</th>
                     <th className="text-left p-4 text-xs font-black text-slate-500 uppercase tracking-wider">Telefono</th>
                     <th className="text-left p-4 text-xs font-black text-slate-500 uppercase tracking-wider">Ruolo</th>
+                    <th className="text-right p-4 text-xs font-black text-slate-500 uppercase tracking-wider">Azioni</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -147,11 +198,29 @@ export default function SystemLogs() {
                             {user.is_superuser ? 'Superuser' : user.role === 'amministratore' ? 'Admin' : 'Magazziniere'}
                           </span>
                         </td>
+                        <td className="p-4">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleEditUser(user)}
+                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              title="Modifica utente"
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteUser(user.id)}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Elimina utente"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={4} className="p-8 text-center text-slate-400">
+                      <td colSpan={5} className="p-8 text-center text-slate-400">
                         Nessun utente trovato
                       </td>
                     </tr>
@@ -295,6 +364,92 @@ export default function SystemLogs() {
                 >
                   <Save size={18} />
                   {createUserMutation.isPending ? 'Creazione...' : 'Crea Utente'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {isEditUserModalOpen && editingUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="glass-card bg-white/90 p-8 w-full max-w-md shadow-2xl relative">
+            <h3 className="text-2xl font-black text-slate-800 tracking-tight mb-6">Modifica Utente</h3>
+
+            <form onSubmit={handleUpdateUser} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Nome</label>
+                  <input
+                    type="text"
+                    value={editingUser.first_name}
+                    onChange={(e) => setEditingUser({ ...editingUser, first_name: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none bg-white transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Cognome</label>
+                  <input
+                    type="text"
+                    value={editingUser.last_name}
+                    onChange={(e) => setEditingUser({ ...editingUser, last_name: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none bg-white transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Email *</label>
+                <input
+                  type="email"
+                  value={editingUser.email}
+                  onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none bg-white transition-all"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Telefono</label>
+                <input
+                  type="tel"
+                  value={editingUser.phone}
+                  onChange={(e) => setEditingUser({ ...editingUser, phone: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none bg-white transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Ruolo</label>
+                <select
+                  value={editingUser.role}
+                  onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none bg-white transition-all"
+                >
+                  <option value="magazziniere">Magazziniere</option>
+                  <option value="amministratore">Amministratore</option>
+                </select>
+              </div>
+
+              <div className="flex gap-3 mt-8 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEditUserModalOpen(false);
+                    setEditingUser(null);
+                  }}
+                  className="flex-1 py-3 font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors"
+                >
+                  Annulla
+                </button>
+                <button
+                  type="submit"
+                  disabled={updateUserMutation.isPending}
+                  className="flex-1 py-3 font-bold text-white bg-primary hover:bg-primary/90 rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  <Save size={18} />
+                  {updateUserMutation.isPending ? 'Salvataggio...' : 'Salva Modifiche'}
                 </button>
               </div>
             </form>
