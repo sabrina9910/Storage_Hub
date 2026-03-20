@@ -61,8 +61,8 @@ export default function AdminLayout() {
     );
   }
 
-  // God Mode specific items
-  if (currentUser?.is_superuser) {
+  // God Mode and Admin specific items
+  if (currentUser?.is_superuser || currentUser?.role === 'amministratore') {
     navItems.push(
       { name: 'System Logs', to: '/admin/system', icon: Terminal }
     );

@@ -53,6 +53,7 @@ function App() {
                 <Route path="/admin/suppliers" element={<SupplierManager />} />
                 <Route path="/admin/suppliers/:id" element={<SupplierDetail />} />
                 <Route path="/admin/inventory" element={<MovementLogs />} />
+                <Route path="/admin/movimenti" element={<MovementLogs />} />
                 <Route path="/admin/profile" element={<UserProfile />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/admin/search" element={<GlobalSearch />} />
@@ -72,10 +73,6 @@ function App() {
                 <Route path="/admin/inventory-value" element={<InventoryValue />} />
                 <Route path="/admin/at-risk-lots" element={<AtRiskLots />} />
                 <Route path="/admin/products/:id" element={<ProductDetail />} />
-              </Route>
-              
-              {/* God Mode Route */}
-              <Route element={<ProtectedRoute requiredRole="superuser" />}>
                 <Route path="/admin/system" element={<SystemLogs />} />
               </Route>
             </Route>
