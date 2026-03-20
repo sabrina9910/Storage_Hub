@@ -14,6 +14,7 @@ urlpatterns = [
     path('api/suppliers/', include('fornitori.urls')),
     path('api/', include('prodotti.urls')),
     path('api/movements/', include('movimenti.urls')),
+    path('api/audit-log/', include('auditlog.urls')),
     path('api/token/', EmailTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

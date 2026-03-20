@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { LayoutDashboard, PackageSearch, ArrowLeftRight, Users, LogOut, Search, Menu, X, Terminal, Tags, UserCircle, ClipboardList, Ban } from 'lucide-react';
+import { LayoutDashboard, PackageSearch, ArrowLeftRight, Users, LogOut, Search, Menu, X, Terminal, Tags, UserCircle, ClipboardList, Ban, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { apiServices } from '@/lib/api';
 
@@ -72,7 +72,8 @@ export default function AdminLayout() {
   // Admin/Manager specific items
   if (currentUser?.role === 'amministratore' || currentUser?.is_superuser) {
     navItems.push(
-      { name: 'Blacklist', to: '/admin/blacklist', icon: Ban }
+      { name: 'Blacklist', to: '/admin/blacklist', icon: Ban },
+      { name: 'Audit Log', to: '/admin/audit-log', icon: FileText }
     );
   }
 

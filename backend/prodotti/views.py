@@ -37,6 +37,7 @@ from core.permissions import IsMagazziniere
 from .models import Product, ProductLot
 from .serializers import ProductSerializer, ProductLotSerializer
 from .filters import ProductFilter
+from auditlog.utils import create_audit_log
 
 class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
@@ -272,6 +273,9 @@ class ProductViewSet(viewsets.ModelViewSet):
         product.blacklist_reason = reason
         product.save()
         
+        # Create audit log
+        create_audit_log(request.user, 'BLACKLISTED', product, 0, reason)
+        
         serializer = self.get_serializer(product)
         return Response(serializer.data)
 
@@ -286,6 +290,9 @@ class ProductViewSet(viewsets.ModelViewSet):
         product.is_blacklisted = False
         product.blacklist_reason = ''
         product.save()
+        
+        # Create audit log
+        create_audit_log(request.user, 'RESTORED', product, 0, 'Product restored from blacklist')
         
         serializer = self.get_serializer(product)
         return Response(serializer.data)

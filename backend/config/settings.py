@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'fornitori',
     'prodotti',
     'movimenti',
+    'auditlog',
 ]
 
 MIDDLEWARE = [
