@@ -181,14 +181,20 @@ export default function AdminLayout() {
             >
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-bold text-slate-800 group-hover:text-primary transition-colors">
-                  {currentUser?.email ? currentUser.email.split('@')[0] : 'Utente'}
+                  {currentUser?.first_name || currentUser?.last_name 
+                    ? `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim()
+                    : currentUser?.email ? currentUser.email.split('@')[0] : 'Utente'
+                  }
                 </p>
                 <p className="text-xs text-slate-500 font-medium uppercase tracking-widest">
                   {currentUser?.is_superuser ? 'Superuser' : currentUser?.role === 'magazziniere' ? 'Magazziniere' : 'Amministratore'}
                 </p>
               </div>
               <div className="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold border-2 border-white shadow-md uppercase group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all relative">
-                {currentUser?.email ? currentUser.email.charAt(0) : 'U'}
+                {currentUser?.first_name 
+                  ? currentUser.first_name.charAt(0)
+                  : currentUser?.email ? currentUser.email.charAt(0) : 'U'
+                }
                 <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow-sm text-slate-400 group-hover:text-primary">
                   <UserCircle size={14} />
                 </div>

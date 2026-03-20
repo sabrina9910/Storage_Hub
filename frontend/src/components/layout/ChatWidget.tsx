@@ -46,7 +46,7 @@ export default function ChatWidget() {
     setIsLoading(true);
 
     try {
-      const response = await apiServices.askChatbot(userMsg.text);
+      const response = await apiServices.askChatbot({ message: userMsg.text });
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
         text: response.reply,
