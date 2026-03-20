@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Package, Clock, ShieldAlert, FileText, Layers, AlertCircle, TrendingDown, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Package, Clock, ShieldAlert, FileText, Layers, AlertCircle, TrendingDown, TrendingUp, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { apiServices } from '@/lib/api';
 import QuarantineModal from '@/components/admin/QuarantineModal';
@@ -44,6 +44,34 @@ export default function ProductDetail() {
   const handleQuarantine = () => {
     if (id) {
       quarantineMutation.mutate(id);
+    }
+  };
+
+  const handleExport = async (format: 'csv' | 'xlsx' | 'xml' | 'pdf') => {
+    if (!id) return;
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`http://localhost:8000/api/products/${id}/export/${format}/`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) throw new Error('Export failed');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `product_${product?.sku || id}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast.success(`Esportazione ${format.toUpperCase()} completata!`);
+    } catch (error) {
+      toast.error('Errore durante l\'esportazione');
     }
   };
 
@@ -122,6 +150,20 @@ export default function ProductDetail() {
                  </span>
                </div>
              </div>
+           </div>
+           <div className="flex gap-2">
+             <button onClick={() => handleExport('csv')} className="px-4 py-2 bg-white hover:bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-sm hover:shadow">
+               <Download size={16} /> CSV
+             </button>
+             <button onClick={() => handleExport('xlsx')} className="px-4 py-2 bg-white hover:bg-blue-50 border border-blue-200 text-blue-700 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-sm hover:shadow">
+               <Download size={16} /> XLSX
+             </button>
+             <button onClick={() => handleExport('xml')} className="px-4 py-2 bg-white hover:bg-purple-50 border border-purple-200 text-purple-700 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-sm hover:shadow">
+               <Download size={16} /> XML
+             </button>
+             <button onClick={() => handleExport('pdf')} className="px-4 py-2 bg-white hover:bg-rose-50 border border-rose-200 text-rose-700 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-sm hover:shadow">
+               <Download size={16} /> PDF
+             </button>
            </div>
         </div>
       </div>

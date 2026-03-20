@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { LayoutDashboard, PackageSearch, ArrowLeftRight, Users, LogOut, Search, Menu, X, Terminal, Tags, UserCircle } from 'lucide-react';
+import { LayoutDashboard, PackageSearch, ArrowLeftRight, Users, LogOut, Search, Menu, X, Terminal, Tags, UserCircle, ClipboardList } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { apiServices } from '@/lib/api';
 
@@ -56,6 +56,7 @@ export default function AdminLayout() {
     navItems.push(
       { name: 'Prodotti e Cataloghi', to: '/admin/products', icon: PackageSearch },
       { name: 'Categorie', to: '/admin/categories', icon: Tags },
+      { name: 'Movimenti', to: '/admin/movimenti', icon: ClipboardList },
       { name: 'Registro Mov.', to: '/admin/inventory', icon: ArrowLeftRight },
       { name: 'Fornitori', to: '/admin/suppliers', icon: Users }
     );

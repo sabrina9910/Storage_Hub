@@ -29,6 +29,7 @@ import ProductDetail from './pages/admin/ProductDetail';
 import GlobalSearch from './pages/admin/GlobalSearch';
 import Profile from './pages/admin/Profile';
 import SystemLogs from './pages/admin/SystemLogs';
+import Movimenti from './pages/admin/Movimenti';
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ function App() {
                 <Route path="/admin/suppliers" element={<SupplierManager />} />
                 <Route path="/admin/suppliers/:id" element={<SupplierDetail />} />
                 <Route path="/admin/inventory" element={<MovementLogs />} />
+                <Route path="/admin/movimenti" element={<Movimenti />} />
                 <Route path="/admin/profile" element={<UserProfile />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/admin/search" element={<GlobalSearch />} />
