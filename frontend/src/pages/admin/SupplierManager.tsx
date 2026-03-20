@@ -7,12 +7,13 @@ import { toast } from 'react-hot-toast';
 
 export default function SupplierManager() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [expandedSupplier, setExpandedSupplier] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newSupplier, setNewSupplier] = useState({ name: '', contact_person: '', email: '', phone: '' });
 
   // Queries
-  const { data: suppliers, isLoading: sLoading } = useQuery({ queryKey: ['suppliers'], queryFn: apiServices.getSuppliers });
+  const { data: suppliers, isLoading: sLoading } = useQuery({ queryKey: ['suppliers'], queryFn: () => apiServices.getSuppliers() });
   const { data: products, isLoading: pLoading } = useQuery({ queryKey: ['products'], queryFn: apiServices.getProducts });
   const { data: lots, isLoading: lLoading } = useQuery({ queryKey: ['lots'], queryFn: apiServices.getLots });
 
@@ -43,11 +44,11 @@ export default function SupplierManager() {
 
   // Helper to get products for a supplier and their total stock
   const getSupplierProducts = (supplierId: string) => {
-    const sProducts = safeProducts.filter(p => p.supplier === supplierId);
-    return sProducts.map(p => {
+    const sProducts = safeProducts.filter((p: any) => p.supplier === supplierId);
+    return sProducts.map((p: any) => {
       const totalStock = safeLots
-        .filter(l => l.product === p.id)
-        .reduce((sum, lot) => sum + lot.current_quantity, 0);
+        .filter((l: any) => l.product === p.id)
+        .reduce((sum: number, lot: any) => sum + lot.current_quantity, 0);
       return { ...p, totalStock };
     });
   };
@@ -87,7 +88,7 @@ export default function SupplierManager() {
             {safeSuppliers.length === 0 ? (
               <div className="p-8 text-center text-slate-400">Nessun fornitore registrato.</div>
             ) : (
-              safeSuppliers.map(supplier => {
+              safeSuppliers.map((supplier: any) => {
                 const suppProducts = getSupplierProducts(supplier.id);
 
                 return (

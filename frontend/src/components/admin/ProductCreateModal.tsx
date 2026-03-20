@@ -22,10 +22,10 @@ export default function ProductCreateModal({ onClose }: ProductCreateModalProps)
   });
 
   const { data: categories } = useQuery({ queryKey: ['categories'], queryFn: apiServices.getCategories });
-  const { data: suppliers } = useQuery({ queryKey: ['suppliers'], queryFn: apiServices.getSuppliers });
+  const { data: suppliers } = useQuery({ queryKey: ['suppliers'], queryFn: () => apiServices.getSuppliers() });
 
   const safeCats = Array.isArray(categories?.results || categories) ? (categories?.results || categories) : [];
-  const safeSuppliers = Array.isArray(suppliers?.results || suppliers) ? (suppliers?.results || suppliers) : [];
+  const safeSuppliers = Array.isArray(suppliers) ? suppliers : [];
 
   const createMutation = useMutation({
     mutationFn: (data: any) => apiServices.createProduct(data),

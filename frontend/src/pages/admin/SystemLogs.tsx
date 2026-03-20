@@ -121,7 +121,7 @@ export default function SystemLogs() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {users && users.length > 0 ? (
+                  {Array.isArray(users) && users.length > 0 ? (
                     users.map((user: any) => (
                       <tr key={user.id} className="hover:bg-white/40 transition-colors">
                         <td className="p-4">
@@ -181,7 +181,7 @@ export default function SystemLogs() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {loginLogs && loginLogs.length > 0 ? (
+                  {Array.isArray(loginLogs) && loginLogs.length > 0 ? (
                     loginLogs.map((log: any) => (
                       <tr key={log.id} className="hover:bg-white/40 transition-colors">
                         <td className="p-4 text-slate-600 font-mono text-sm">{formatDate(log.timestamp)}</td>

@@ -13,14 +13,14 @@ export default function NotificationBell() {
   });
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const { data: alertsData, isLoading } = useQuery({
+  const { data: alerts, isLoading } = useQuery({
     queryKey: ['allAlerts'],
-    queryFn: apiServices.getAlertsAll,
+    queryFn: apiServices.getAlerts,
     refetchInterval: 30000,
   });
 
-  const lowStock = alertsData?.low_stock || [];
-  const quarantine = alertsData?.quarantine || [];
+  const lowStock = alerts?.low_stock || [];
+  const quarantine = alerts?.quarantine || [];
   
   // Create unique IDs for mapping/tracking
   const currentAlerts = [

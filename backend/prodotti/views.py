@@ -315,11 +315,11 @@ class ProductLotViewSet(viewsets.ModelViewSet):
             return ProductLot.objects.none()
             
         if getattr(user, 'is_superuser', False):
-            qs = ProductLot.objects.all().select_related('product')
+            qs = ProductLot.objects.all()
         else:
-            qs = ProductLot.objects.filter(is_active=True).select_related('product')
+            qs = ProductLot.objects.filter(is_active=True)
             
-        return qs.order_by('expiration_date')
+        return qs.select_related('product', 'product__category').prefetch_related('product__suppliers').order_by('expiration_date')
 
     def perform_destroy(self, instance):
         instance.is_active = False

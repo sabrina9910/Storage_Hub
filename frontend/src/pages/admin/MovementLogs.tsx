@@ -37,7 +37,7 @@ export default function MovementLogs() {
   // Enriched Data combining relations
   const enrichedMovements = useMemo(() => {
     if (isLoading) return [];
-    return safeMovements.map(m => {
+    return safeMovements.map((m: any) => {
       const lot = safeLots.find((l:any) => l.id === m.lot);
       const product = lot ? safeProducts.find((p:any) => p.id === lot.product) : null;
       const user = safeUsers.find((u:any) => u.id === m.user);
@@ -61,10 +61,9 @@ export default function MovementLogs() {
         lot_number: lot?.lot_number || 'N/D',
         sku: product?.sku || 'N/D',
         product_name: mockName,
-        unit_of_measure: product?.unit_of_measure || 'pz',
         user_email: user?.email || 'Sistema'
       };
-    }).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    }).sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }, [safeMovements, safeLots, safeProducts, safeUsers, isLoading]);
 
   // Filtering Logic (frontend fallback for complex dates if backend isn't handling it, though we pass it anyway)
@@ -75,18 +74,17 @@ export default function MovementLogs() {
     if (filters.date !== 'all') {
       let thresholdDate = new Date(0);
       if (filters.date === 'today') thresholdDate = subDays(now, 1);
-      if (filters.date === '7days') thresholdDate = subDays(now, 7);
       if (filters.date === '30days') thresholdDate = subDays(now, 30);
       
-      result = result.filter(m => isAfter(new Date(m.timestamp), thresholdDate));
+      result = result.filter((m: any) => isAfter(new Date(m.timestamp), thresholdDate));
     }
 
     if (filters.type !== 'ALL') {
-      result = result.filter(m => m.movement_type === filters.type);
+      result = result.filter((m: any) => m.movement_type === filters.type);
     }
 
     if (filters.user !== 'ALL') {
-      result = result.filter(m => m.user && m.user.toString() === filters.user);
+      result = result.filter((m: any) => m.user && m.user.toString() === filters.user);
     }
 
     return result;
@@ -181,11 +179,11 @@ export default function MovementLogs() {
               <span className="text-slate-500">|</span>
               <span className="text-amber-500 font-bold">Latency: {Math.floor(Math.random() * 30 + 10)}ms</span>
             </div>
-            <div className="text-slate-600 text-xs text-right">ROOT PRIVELEGES GRANTED</div>
+            <div className="text-slate-600 text-xs text-right">ROOT PRIVILEGES GRANTED</div>
           </div>
           <div className="flex-1 overflow-y-auto custom-scrollbar pr-4 text-slate-300 space-y-2">
             <div><span className="text-fuchsia-400">root@storagehub</span>:<span className="text-blue-400">/var/log/movements</span>$ tail -n 50 audit.log</div>
-            {enrichedMovements.slice(0, 50).map((m, i) => (
+            {enrichedMovements.slice(0, 50).map((m: any, i: number) => (
               <div key={m.id} className="border-l-2 border-slate-800 pl-4 py-1 hover:bg-white/5 transition-colors">
                 <span className="text-slate-500">[{m.timestamp}]</span>{' '}
                 <span className={m.movement_type === 'QUARANTINE' ? "text-rose-400 font-bold" : "text-emerald-400"}>[{m.movement_type}]</span>{' '}
@@ -245,7 +243,7 @@ export default function MovementLogs() {
                   <p className="text-sm mt-1">{debouncedSearch ? "Prova con una keyword diversa." : "Modifica i filtri di ricerca per ottenere altri risultati."}</p>
                 </div>
               ) : (
-                filteredMovements.map(movement => {
+                filteredMovements.map((movement: any) => {
                   const isQuarantine = movement.movement_type === 'QUARANTINE';
                   return (
                     <div 

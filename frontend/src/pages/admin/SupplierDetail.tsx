@@ -83,10 +83,10 @@ export default function SupplierDetail() {
               <Building2 size={14} /> Informazioni Azienda
             </h3>
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Nome" icon={<Building2 size={16} />} value={displayData.name} isEditing={isEditing} onChange={(v) => setFormData({...formData, name: v})} />
-              <Field label="Ragione Sociale" icon={<Building2 size={16} />} value={displayData.business_name} isEditing={isEditing} onChange={(v) => setFormData({...formData, business_name: v})} />
-              <Field label="P.IVA" icon={<FileText size={16} />} value={displayData.vat_number} isEditing={isEditing} onChange={(v) => setFormData({...formData, vat_number: v})} />
-              <Field label="Sito Web" icon={<Globe size={16} />} value={displayData.website} isEditing={isEditing} onChange={(v) => setFormData({...formData, website: v})} />
+              <Field label="Nome" icon={<Building2 size={16} />} value={displayData.name} isEditing={isEditing} onChange={(v: string) => setFormData({...formData, name: v})} />
+              <Field label="Ragione Sociale" icon={<Building2 size={16} />} value={displayData.business_name} isEditing={isEditing} onChange={(v: string) => setFormData({...formData, business_name: v})} />
+              <Field label="P.IVA" icon={<FileText size={16} />} value={displayData.vat_number} isEditing={isEditing} onChange={(v: string) => setFormData({...formData, vat_number: v})} />
+              <Field label="Sito Web" icon={<Globe size={16} />} value={displayData.website} isEditing={isEditing} onChange={(v: string) => setFormData({...formData, website: v})} />
             </div>
           </div>
 
@@ -95,9 +95,9 @@ export default function SupplierDetail() {
               <User size={14} /> Contatti
             </h3>
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Referente" icon={<User size={16} />} value={displayData.contact_person} isEditing={isEditing} onChange={(v) => setFormData({...formData, contact_person: v})} />
-              <Field label="Email" icon={<Mail size={16} />} value={displayData.email} isEditing={isEditing} onChange={(v) => setFormData({...formData, email: v})} type="email" />
-              <Field label="Telefono" icon={<Phone size={16} />} value={displayData.phone} isEditing={isEditing} onChange={(v) => setFormData({...formData, phone: v})} />
+              <Field label="Referente" icon={<User size={16} />} value={displayData.contact_person} isEditing={isEditing} onChange={(v: string) => setFormData({...formData, contact_person: v})} />
+              <Field label="Email" icon={<Mail size={16} />} value={displayData.email} isEditing={isEditing} onChange={(v: string) => setFormData({...formData, email: v})} type="email" />
+              <Field label="Telefono" icon={<Phone size={16} />} value={displayData.phone} isEditing={isEditing} onChange={(v: string) => setFormData({...formData, phone: v})} />
             </div>
           </div>
 
@@ -107,11 +107,11 @@ export default function SupplierDetail() {
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <Field label="Via" icon={<MapPin size={16} />} value={displayData.address_street} isEditing={isEditing} onChange={(v) => setFormData({...formData, address_street: v})} />
+                <Field label="Via" icon={<MapPin size={16} />} value={displayData.address_street} isEditing={isEditing} onChange={(v: string) => setFormData({...formData, address_street: v})} />
               </div>
-              <Field label="Città" value={displayData.address_city} isEditing={isEditing} onChange={(v) => setFormData({...formData, address_city: v})} />
-              <Field label="CAP" value={displayData.address_zip} isEditing={isEditing} onChange={(v) => setFormData({...formData, address_zip: v})} />
-              <Field label="Paese" value={displayData.address_country} isEditing={isEditing} onChange={(v) => setFormData({...formData, address_country: v})} />
+              <Field label="Città" value={displayData.address_city} isEditing={isEditing} onChange={(v: string) => setFormData({...formData, address_city: v})} />
+              <Field label="CAP" value={displayData.address_zip} isEditing={isEditing} onChange={(v: string) => setFormData({...formData, address_zip: v})} />
+              <Field label="Paese" value={displayData.address_country} isEditing={isEditing} onChange={(v: string) => setFormData({...formData, address_country: v})} />
             </div>
           </div>
 
@@ -119,14 +119,14 @@ export default function SupplierDetail() {
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
               <CreditCard size={14} /> Condizioni Pagamento
             </h3>
-            <Field label="Termini" value={displayData.payment_terms} isEditing={isEditing} onChange={(v) => setFormData({...formData, payment_terms: v})} />
+            <Field label="Termini" value={displayData.payment_terms} isEditing={isEditing} onChange={(v: string) => setFormData({...formData, payment_terms: v})} />
           </div>
 
           <div className="glass-card p-6">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
               <FileText size={14} /> Note
             </h3>
-            <Field label="Commenti" value={displayData.notes} isEditing={isEditing} onChange={(v) => setFormData({...formData, notes: v})} multiline />
+            <Field label="Commenti" value={displayData.notes} isEditing={isEditing} onChange={(v: string) => setFormData({...formData, notes: v})} multiline />
           </div>
         </div>
 

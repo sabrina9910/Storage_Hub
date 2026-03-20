@@ -20,10 +20,11 @@ export default function Profile() {
     confirm_password: ''
   });
 
-  const { data: user, isLoading } = useQuery({
+  const { data: userData, isLoading } = useQuery({
     queryKey: ['profile'],
     queryFn: apiServices.getProfile,
   });
+  const user: any = userData;
 
   const updateEmailMutation = useMutation({
     mutationFn: (email: string) => apiServices.updateProfile({ email }),

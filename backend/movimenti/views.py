@@ -45,7 +45,11 @@ class StockMovementViewSet(viewsets.ModelViewSet):
         if not user or not user.is_authenticated:
             return StockMovement.objects.none()
         
-        qs = StockMovement.objects.all().select_related('product', 'lot', 'user')
+        qs = StockMovement.objects.all().select_related(
+            'product', 'product__category', 
+            'lot', 'lot__product', 'lot__product__category', 
+            'user'
+        ).prefetch_related('product__suppliers', 'lot__product__suppliers')
         
         # Period filtering
         period = self.request.query_params.get('period')
