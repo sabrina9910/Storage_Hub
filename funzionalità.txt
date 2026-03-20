@@ -1,7 +1,38 @@
-1. Possibiltà di aprire dalla dashboard le card: valore inventario, prodotti attivi, quarantena e allarmi scorte;
-2. Attivare pulsante visualizza tutti i lotti a rischio;
-3. Creare una scheda fornitori più approfondita;
-4. Creare profilo utente / inserire cambio email e pass;
+1. Possibiltà di aprire dalla dashboard le card: valore inventario, prodotti attivi, quarantena e allarmi scorte; ILARIA (FATTO)
+2. Attivare pulsante visualizza tutti i lotti a rischio; ILARIA FATTO
+3. Creare una scheda fornitori più approfondita;   SABRINA  
+4. Creare profilo utente / inserire cambio email e pass; SABRINA
+5. Controllare dashboard worker e manager; SABRINA buttare idee
+6. Possibilità di scaricare un file excel con il riepilogo del prodotto (file: csv xml(sabrina lo ricorda) e pdf); SABRINA
+7. Possibilità di inserire un prodotto in quarantena; ILARIA FATTO
+8. Possibilità di inserire un prodotto in blacklist; SABRINA fare una blacklist (bottone dove scrivi elimina prodotto) o altra pagina che si apre con questi file;
+9. Possibilità di scaricare un file excel riepilogo dei prodotti per singolo fornitore e posisbilità di 
+scaricare un catalogo con tutto quello che può offrire l'azienda; SABRINA
+10. Creare una scheda per singolo prodotto con il riepilogo dei movimenti e tutte le cartetteristiche del 
+prodotto stesso (tipo ecommerce per i dettagli); ILARIA FATTO
+11. funzionalità admin, worker e manager: nella dashboard un bottone ordini per fare add e remove di prodotti; SABRINA
+12. Sistemiamo worker e manager seguendo la consegna di ema (NOMI); ILARIA FATTO
+13. Profilo: inserire change name;RIVEDERE 
+14. possibilità di aggiungere più magazzinieri e admin; SABRINA
+15. attivare il tasto cerca; ILARIA FATTO
+16. Controllare gli alert e le notifiche renderlo modificabile; MANU
+17. sistemare filtri; ILARIA FATTO
+18. nome di chi fa il movimento di email, e tutto quello che è necessario RUOLO; SABRINA 
+19. anagrafica fatta bene del singolo manager e magazziniere; ILARIA FATTO
+20. ├── alert_report/             # APP 6: ALERT E MONITORAGGIO (Requisito Obbligatorio) MANUELA
+│   ├── services.py           # Logica complessa: calcola la giacenza vera sommando tutti i lotti attivi
+│   ├── views.py              # "Endpoint dedicato che restituisca l'elenco dei prodotti sotto soglia"
+│   └── urls.py               # /api/alerts/low-stock/, /api/reports/inventory-value/
+│
+└── ai_services/              # APP 7: INTEGRAZIONE AI (Requisito Obbligatorio + Bonus Multi-Provider) MANUELA
+    ├── providers/            # Pattern Architetturale per il Bonus Multi-Provider
+    │   ├── base.py           # Interfaccia base astratta
+    │   ├── gemini.py         # Logica di connessione alle API di Google Gemini
+    │   └── openai.py         # Logica di connessione alle API di OpenAI
+    ├── prompts.py            # Il file di Sabrina: contiene i testi dei prompt contestualizzati
+    ├── services.py           # Raccoglie i dati dal DB (storico, anomalie) per iniettarli nel prompt
+    ├── views.py              # Endpoint per invocare l'AI (es. genera report, chat assistente)
+    └── urls.py               # /api/ai/generate-report/, /api/ai/chat/
 
 
 backend/

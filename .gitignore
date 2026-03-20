@@ -89,3 +89,16 @@ htmlcov/
 .coverage.*
 .cache
 .pytest_cache/
+
+# Vite
+.vite/
+frontend/.vite/
+
+# Backup files
+*.bak
+
+# Ignora migrazioni
+**/migrations/
+
+# Backend specific ignores
+backend/requirements.txt
