@@ -15,6 +15,16 @@ class StockMovementSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['timestamp', 'user']
 
+    def get_product_name(self, obj):
+        if obj.product: return obj.product.name
+        if obj.lot and obj.lot.product: return obj.lot.product.name
+        return "N/D"
+
+    def get_product_sku(self, obj):
+        if obj.product: return obj.product.sku
+        if obj.lot and obj.lot.product: return obj.lot.product.sku
+        return "N/D"
+
     def create(self, validated_data):
         movement_type = validated_data.get('movement_type')
         quantity = validated_data.get('quantity')
