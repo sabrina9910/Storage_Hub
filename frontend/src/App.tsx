@@ -30,6 +30,8 @@ import GlobalSearch from './pages/admin/GlobalSearch';
 import Profile from './pages/admin/Profile';
 import SystemLogs from './pages/admin/SystemLogs';
 import Movimenti from './pages/admin/Movimenti';
+import Blacklist from './pages/admin/Blacklist';
+import AuditLog from './pages/admin/AuditLog';
 
 const queryClient = new QueryClient();
 
@@ -69,6 +71,8 @@ function App() {
                 <Route path="/admin/dashboard" element={<DashboardAdmin />} />
                 <Route path="/admin/active-products" element={<ActiveProductsList />} />
                 <Route path="/admin/quarantine" element={<QuarantineList />} />
+                <Route path="/admin/blacklist" element={<Blacklist />} />
+                <Route path="/admin/audit-log" element={<AuditLog />} />
                 <Route path="/admin/users" element={<UsersManagement />} />
                 <Route path="/admin/low-stock-alerts" element={<LowStockAlerts />} />
                 <Route path="/admin/inventory-value" element={<InventoryValue />} />

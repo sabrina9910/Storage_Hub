@@ -33,6 +33,7 @@ from .serializers import StockMovementSerializer
 from .filters import StockMovementFilter
 from prodotti.models import Product, ProductLot
 from users.models import User
+from auditlog.utils import create_audit_log
 
 class StockMovementViewSet(viewsets.ModelViewSet):
     serializer_class = StockMovementSerializer
@@ -133,6 +134,9 @@ class StockMovementViewSet(viewsets.ModelViewSet):
                 notes=notes
             )
             
+            # Create audit log
+            create_audit_log(user, 'STOCK_IN', product, quantity, notes)
+            
             serializer = self.get_serializer(movement)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -199,6 +203,9 @@ class StockMovementViewSet(viewsets.ModelViewSet):
                 notes=notes
             )
             
+            # Create audit log
+            create_audit_log(user, 'STOCK_OUT', product, quantity, notes)
+            
             serializer = self.get_serializer(movement)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -234,6 +241,9 @@ class StockMovementViewSet(viewsets.ModelViewSet):
                 quantity=total_qty,
                 notes=reason
             )
+            
+            # Create audit log
+            create_audit_log(user, 'QUARANTINED', product, total_qty, reason)
             
             serializer = self.get_serializer(movement)
             return Response(serializer.data, status=status.HTTP_201_CREATED)

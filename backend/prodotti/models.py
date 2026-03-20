@@ -22,6 +22,8 @@ class Product(models.Model):
     is_active = models.BooleanField(default=True)
     is_quarantined = models.BooleanField(default=False)
     quarantine_reason = models.TextField(blank=True)
+    is_blacklisted = models.BooleanField(default=False)
+    blacklist_reason = models.TextField(blank=True)
 
     def __str__(self):
         return f"[{self.sku}] {self.name}"
