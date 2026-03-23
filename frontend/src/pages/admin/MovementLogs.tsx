@@ -9,6 +9,24 @@ import SearchBar from '@/components/common/SearchBar';
 import FilterPanel from '@/components/common/FilterPanel';
 import { useDebounce } from '@/hooks/useDebounce';
 
+interface ModelBase {
+  id: number | string;
+  [key: string]: string | number | boolean | null | undefined;
+}
+
+interface MovementItem extends ModelBase {
+  timestamp: string;
+  movement_type: string;
+  quantity: number;
+  unit_of_measure: string;
+  lot: number | string;
+  user: number | string;
+  lot_number?: string;
+  sku?: string;
+  product_name?: string;
+  user_email?: string;
+}
+
 export default function MovementLogs() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState<Record<string, string>>({ date: 'all', type: 'ALL', user: 'ALL' });
@@ -36,10 +54,10 @@ export default function MovementLogs() {
   // Enriched Data combining relations
   const enrichedMovements = useMemo(() => {
     if (isLoading) return [];
-    return safeMovements.map((m: any) => {
-      const lot = safeLots.find((l:any) => l.id === m.lot);
-      const product = lot ? safeProducts.find((p:any) => p.id === lot.product) : null;
-      const user = safeUsers.find((u:any) => u.id === m.user);
+    return safeMovements.map((m: MovementItem) => {
+      const lot = safeLots.find((l: ModelBase) => l.id === m.lot);
+      const product = lot ? safeProducts.find((p: ModelBase) => p.id === lot.product) : null;
+      const user = safeUsers.find((u: ModelBase) => u.id === m.user);
       
       const foodMocks = [
         { name: 'Parmigiano Reggiano DOP 24 Mesi' },
@@ -49,7 +67,7 @@ export default function MovementLogs() {
         { name: 'Prosciutto di Parma DOP' },
       ];
       
-      let mockName = product?.name || 'N/D';
+      let mockName = product?.name ? String(product.name) : 'N/D';
       if (product?.id) {
         const stableIndex = Math.abs(String(product.id).split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % foodMocks.length;
         mockName = foodMocks[stableIndex].name;
@@ -57,12 +75,12 @@ export default function MovementLogs() {
 
       return {
         ...m,
-        lot_number: lot?.lot_number || 'N/D',
-        sku: product?.sku || 'N/D',
+        lot_number: lot?.lot_number ? String(lot.lot_number) : 'N/D',
+        sku: product?.sku ? String(product.sku) : 'N/D',
         product_name: mockName,
-        user_email: user?.email || 'Sistema'
+        user_email: user?.email ? String(user.email) : 'Sistema'
       };
-    }).sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    }).sort((a: MovementItem, b: MovementItem) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }, [safeMovements, safeLots, safeProducts, safeUsers, isLoading]);
 
   // Filtering Logic (frontend fallback for complex dates if backend isn't handling it, though we pass it anyway)
@@ -75,15 +93,15 @@ export default function MovementLogs() {
       if (filters.date === 'today') thresholdDate = subDays(now, 1);
       if (filters.date === '30days') thresholdDate = subDays(now, 30);
       
-      result = result.filter((m: any) => isAfter(new Date(m.timestamp), thresholdDate));
+      result = result.filter((m: MovementItem) => isAfter(new Date(m.timestamp), thresholdDate));
     }
 
     if (filters.type !== 'ALL') {
-      result = result.filter((m: any) => m.movement_type === filters.type);
+      result = result.filter((m: MovementItem) => m.movement_type === filters.type);
     }
 
     if (filters.user !== 'ALL') {
-      result = result.filter((m: any) => m.user && m.user.toString() === filters.user);
+      result = result.filter((m: MovementItem) => m.user && m.user.toString() === filters.user);
     }
 
     return result;
@@ -141,7 +159,7 @@ export default function MovementLogs() {
       label: 'Operatore',
       options: [
         { value: 'ALL', label: 'Tutti gli Operatori' },
-        ...(safeUsers.map((u: any) => ({ value: u.id.toString(), label: u.email })))
+        ...(safeUsers.map((u: ModelBase) => ({ value: u.id.toString(), label: String(u.email || u.id) })))
       ]
     }
   ];
@@ -182,7 +200,7 @@ export default function MovementLogs() {
         <div className="w-full overflow-x-auto custom-scrollbar">
           <div className="min-w-[1000px]">
             {/* Header */}
-            <div className="grid grid-cols-12 gap-4 p-4 bg-slate-50/80 border-b border-slate-200 font-bold text-slate-500 text-sm uppercase tracking-wider">
+            <div className="grid grid-cols-12 gap-4 p-4 bg-white/20 border-b border-white/40 font-bold text-slate-700 text-sm uppercase tracking-wider backdrop-blur-sm">
               <div className="col-span-2">Data / Ora</div>
               <div className="col-span-3">Prodotto</div>
               <div className="col-span-2">Lotto</div>
@@ -192,7 +210,7 @@ export default function MovementLogs() {
             </div>
 
             {/* Rows */}
-            <div className="divide-y divide-slate-100/50">
+            <div className="divide-y divide-white/20">
               {filteredMovements.length === 0 ? (
                 <div className="p-16 text-center text-slate-400 flex flex-col items-center">
                   <History size={48} className="mb-4 opacity-50 text-slate-300" />
@@ -200,17 +218,17 @@ export default function MovementLogs() {
                   <p className="text-sm mt-1">{debouncedSearch ? "Prova con una keyword diversa." : "Modifica i filtri di ricerca per ottenere altri risultati."}</p>
                 </div>
               ) : (
-                filteredMovements.map((movement: any) => {
+                filteredMovements.map((movement: MovementItem) => {
                   const isQuarantine = movement.movement_type === 'QUARANTINE';
                   return (
                     <div 
                       key={movement.id} 
                       className={cn(
-                        "grid grid-cols-12 gap-4 p-4 items-center transition-all hover:bg-slate-50 border-b border-slate-100 last:border-0",
-                        isQuarantine ? "bg-amber-50/50 hover:bg-amber-100/50 border-l-4 border-l-amber-500 shadow-sm relative z-10" : "bg-white border-l-4 border-l-transparent"
+                        "grid grid-cols-12 gap-4 p-4 items-center transition-all hover:bg-white/30 border-b border-white/20 last:border-0 hover:shadow-sm",
+                        isQuarantine ? "bg-amber-100/30 hover:bg-amber-100/50 border-l-4 border-l-amber-400 relative z-10" : "bg-transparent border-l-4 border-l-transparent"
                       )}
                     >
-                      <div className="col-span-2 text-sm text-slate-600 font-medium">
+                      <div className="col-span-2 text-sm text-slate-700 font-bold">
                         {format(new Date(movement.timestamp), "dd MMM yyyy, HH:mm", { locale: it })}
                       </div>
                       
@@ -240,9 +258,9 @@ export default function MovementLogs() {
                       
                       <div className="col-span-2 text-sm text-slate-800 font-bold truncate flex items-center gap-2" title={movement.user_email}>
                         <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-[10px] text-slate-600 border border-white shrink-0">
-                          {movement.user_email.charAt(0).toUpperCase()}
+                          {movement.user_email ? movement.user_email.charAt(0).toUpperCase() : 'U'}
                         </div>
-                        {movement.user_email.split('@')[0]}
+                        {movement.user_email ? movement.user_email.split('@')[0] : 'Sconosciuto'}
                       </div>
                     </div>
                   );

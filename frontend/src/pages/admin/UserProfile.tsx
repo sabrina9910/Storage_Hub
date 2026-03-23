@@ -122,7 +122,10 @@ export default function UserProfile() {
 
   const handleProfileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateProfileMutation.mutate(formData);
+    const payload: any = { ...formData };
+    if (!payload.birth_date) payload.birth_date = null;
+    if (!payload.hire_date) payload.hire_date = null;
+    updateProfileMutation.mutate(payload);
   };
 
   const handlePasswordSubmit = (e: React.FormEvent) => {

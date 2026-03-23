@@ -72,9 +72,9 @@ export default function DashboardAdmin() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-8">
-        <h2 className="text-3xl font-black text-slate-800 tracking-tight">Dashboard Overview</h2>
-        <p className="text-slate-500 font-medium mt-1">Monitora lo stato del tuo magazzino in tempo reale.</p>
+      <div className="mb-10">
+        <h2 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-800 via-slate-700 to-slate-500 tracking-tight drop-shadow-sm mb-2">Dashboard Overview</h2>
+        <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Monitora lo stato del tuo magazzino in tempo reale.</p>
       </div>
 
       <KPIGrid data={{ inventoryValue, activeProducts, lowStockAlerts, quarantineItems }} />

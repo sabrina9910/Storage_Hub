@@ -14,14 +14,33 @@ interface ActiveProduct {
 }
 
 const fetchActiveProducts = async (): Promise<ActiveProduct[]> => {
-  return await fetchApi('/products/?is_active=True');
+  const res = await fetchApi('/products/?is_active=True');
+  return Array.isArray(res?.results) ? res.results : (Array.isArray(res) ? res : []);
 };
 
 export default function ActiveProductsList() {
-  const { data: products, isLoading, isError } = useQuery({
+  const { data: products, isLoading: pLoading, isError: pError } = useQuery({
     queryKey: ['active-products'],
     queryFn: fetchActiveProducts,
   });
+  
+  const { data: categories } = useQuery({ queryKey:['categories'], queryFn: () => fetchApi('/categories/') });
+  const { data: suppliers } = useQuery({ queryKey:['suppliers'], queryFn: () => fetchApi('/suppliers/') });
+
+  const safeCats = Array.isArray(categories?.results || categories) ? (categories?.results || categories) : [];
+  const safeSupp = Array.isArray(suppliers?.results || suppliers) ? (suppliers?.results || suppliers) : [];
+  
+  const categoryMap = new Map(safeCats.map((c: any) => [c.id, c.name]));
+  const supplierMap = new Map(safeSupp.map((s: any) => [s.id, s.name]));
+
+  const enrichedProducts = (products as any[] || []).map((p: any) => ({
+    ...p,
+    catName: String(categoryMap.get((p.category as any)?.id || p.category) || 'N/D'),
+    suppName: String(supplierMap.get((p.supplier as any)?.id || p.supplier) || 'N/D')
+  }));
+
+  const isLoading = pLoading;
+  const isError = pError;
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -72,13 +91,13 @@ export default function ActiveProductsList() {
                 </tr>
               </thead>
               <tbody>
-                {products?.map((product) => (
+                {enrichedProducts?.map((product: any) => (
                   <tr key={product.id} className="border-b border-white/40 last:border-0 hover:bg-white/60 transition-colors">
                     <td className="p-4 font-mono text-sm font-semibold text-slate-700">{product.sku}</td>
                     <td className="p-4 font-semibold text-slate-800">{product.name}</td>
-                    <td className="p-4 text-slate-600">{product.category?.name || '-'}</td>
-                    <td className="p-4 text-slate-600">{product.supplier?.name || '-'}</td>
-                    <td className="p-4 text-slate-600 font-medium">{product.min_stock_level}</td>
+                    <td className="p-4 text-slate-600 font-medium">{product.catName}</td>
+                    <td className="p-4 text-slate-600 font-medium">{product.suppName}</td>
+                    <td className="p-4 text-rose-600 font-black">{product.min_stock_level}</td>
                   </tr>
                 ))}
               </tbody>

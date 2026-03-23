@@ -16,6 +16,7 @@ export default function ProductCatalog() {
   const [searchParams, setSearchParams] = useSearchParams();
   const skuFilter = searchParams.get('sku');
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [productToEdit, setProductToEdit] = useState<any>(null);
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
@@ -91,7 +92,7 @@ export default function ProductCatalog() {
           productLots,
           catName: categoryMap.get(p.category) || 'N/D',
           allergens: [],
-          temp: p.description?.includes('Frigo') ? 'Frigo' : 'Ambiente'
+          temp: p.ambiente || 'Ambiente'
         };
       })
       .filter((p: any) => !skuFilter || p.sku.toLowerCase().includes(skuFilter.toLowerCase()));
@@ -154,16 +155,17 @@ export default function ProductCatalog() {
 
           <button 
             onClick={() => setIsCreatingProduct(true)}
-            className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/30 transition-all active:scale-95 shrink-0 h-[46px]"
+            className="group relative overflow-hidden bg-gradient-to-br from-primary to-indigo-600 border border-white/30 hover:shadow-[0_0_20px_rgba(79,70,229,0.4)] text-white px-6 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all duration-300 active:scale-95 shrink-0 h-[46px]"
           >
-            <Plus size={20} /> <span className="hidden sm:inline">Crea Prodotto</span>
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
+            <Plus size={20} className="relative z-10" /> <span className="hidden sm:inline relative z-10 drop-shadow-md">Crea Prodotto</span>
           </button>
         </div>
       </div>
 
       <div className="glass-card overflow-hidden">
         <div className="w-full">
-          <div className="grid grid-cols-12 gap-4 p-4 bg-slate-50/80 border-b border-slate-200 font-bold text-slate-500 text-sm uppercase tracking-wider">
+          <div className="grid grid-cols-12 gap-4 p-4 bg-white/20 border-b border-white/40 font-bold text-slate-700 text-sm uppercase tracking-wider backdrop-blur-sm">
             <div className="col-span-2">SKU</div>
             <div className="col-span-3">Nome</div>
             <div className="col-span-2">Categoria</div>
@@ -172,9 +174,9 @@ export default function ProductCatalog() {
             <div className="col-span-2 text-right pr-4">Azioni</div>
           </div>
 
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-white/20">
             {enrichedProducts.length === 0 ? (
-              <div className="p-12 text-center text-slate-400 flex flex-col items-center">
+              <div className="p-12 text-center text-slate-500 flex flex-col items-center">
                 <PackageOpen size={48} className="mb-4 opacity-50" />
                 <p className="font-bold text-lg">{debouncedSearch ? "Nessun elemento trovato per la tua ricerca." : "Il catalogo è attualmente vuoto."}</p>
                 {debouncedSearch && <p className="text-sm mt-1">Prova a usare termini di ricerca diversi.</p>}
@@ -183,11 +185,11 @@ export default function ProductCatalog() {
               enrichedProducts.map((product: any) => {
                 const isExpanded = expandedRows.includes(product.id);
                 return (
-                  <div key={product.id} className="flex flex-col border-b border-slate-100 last:border-0">
+                  <div key={product.id} className="flex flex-col border-b border-white/20 last:border-0 hover:bg-white/30 transition-colors">
                     <div 
                       className={cn(
-                        "grid grid-cols-12 gap-4 p-4 items-center transition-colors hover:bg-white/40 cursor-pointer", 
-                        !product.is_active && "opacity-60 bg-slate-50/50"
+                        "grid grid-cols-12 gap-4 p-4 items-center cursor-pointer", 
+                        !product.is_active && "opacity-60 bg-white/10"
                       )}
                       onClick={() => toggleRow(product.id)}
                     >
@@ -207,7 +209,7 @@ export default function ProductCatalog() {
                         <div className="flex items-center gap-2 mt-1">
                           <span className={cn(
                             "text-[9px] uppercase tracking-widest font-black px-1.5 py-0.5 rounded flex items-center gap-1 w-fit",
-                            product.temp?.includes('Frigo') ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"
+                            product.temp?.toLowerCase().includes('frigo') ? "bg-blue-100 text-blue-700" : "bg-emerald-100 text-emerald-700"
                           )}>
                             <Thermometer size={10} /> {product.temp || 'N/D'}
                           </span>
@@ -232,6 +234,13 @@ export default function ProductCatalog() {
                           <Info size={18} />
                         </Link>
                         <button 
+                          onClick={(e) => { e.stopPropagation(); setProductToEdit(product); }}
+                          className="p-2 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-xl transition-colors active:scale-95"
+                          title="Modifica Prodotto"
+                        >
+                          <Edit2 size={18} />
+                        </button>
+                        <button 
                           onClick={(e) => { e.stopPropagation(); setSelectedProduct(product); }}
                           className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl transition-colors active:scale-95"
                           title="Gestisci Lotti"
@@ -250,40 +259,39 @@ export default function ProductCatalog() {
                         </button>
                       </div>
                     </div>
-
                     {/* Sub-table for Lots */}
                     {isExpanded && (
-                      <div className="bg-slate-50/80 p-6 border-t border-slate-100 animate-in slide-in-from-top-2 duration-200">
-                        <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                      <div className="bg-white/30 backdrop-blur-md p-6 border-t border-white/40 animate-in slide-in-from-top-2 duration-200 shadow-inner">
+                        <h4 className="text-xs font-black text-slate-600 uppercase tracking-widest mb-3 flex items-center gap-2">
                           <Layers size={14} /> Lotti Attivi per {product.sku}
                         </h4>
                         
                         {product.productLots.length === 0 ? (
-                          <div className="p-4 bg-white rounded-xl border border-slate-200 text-sm text-slate-500 text-center">
+                          <div className="p-4 bg-white/40 rounded-xl border border-white/50 text-sm text-slate-600 text-center font-medium shadow-sm">
                             Nessun lotto attivo per questo prodotto.
                           </div>
                         ) : (
-                          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                          <div className="bg-white/40 backdrop-blur-sm rounded-2xl border border-white/50 overflow-hidden shadow-lg shadow-black/5">
                             <table className="w-full text-sm text-left">
-                              <thead className="bg-slate-50 border-b border-slate-200 text-xs uppercase font-black text-slate-500 tracking-wider">
+                              <thead className="bg-white/30 border-b border-white/40 text-xs uppercase font-black text-slate-600 tracking-wider">
                                 <tr>
                                   <th className="px-6 py-3">Codice Lotto</th>
                                   <th className="px-6 py-3">Scadenza</th>
                                   <th className="px-6 py-3 text-right">Q.tà Attuale</th>
                                 </tr>
                               </thead>
-                              <tbody className="divide-y divide-slate-100">
+                              <tbody className="divide-y divide-white/30">
                                 {product.productLots.map((lot: any) => {
                                   const expDate = new Date(lot.expiration_date);
                                   const isExpiringSoon = expDate.getTime() - new Date().getTime() < 15 * 24 * 60 * 60 * 1000;
                                   return (
-                                    <tr key={lot.id} className="hover:bg-slate-50/50 transition-colors">
-                                      <td className="px-6 py-3 font-mono font-bold text-slate-700">{lot.lot_number}</td>
-                                      <td className={cn("px-6 py-3 font-semibold", isExpiringSoon ? "text-amber-600" : "text-slate-600")}>
+                                    <tr key={lot.id} className="hover:bg-white/50 transition-colors">
+                                      <td className="px-6 py-4 font-mono font-bold text-slate-800">{lot.lot_number}</td>
+                                      <td className={cn("px-6 py-4 font-semibold", isExpiringSoon ? "text-amber-700" : "text-slate-700")}>
                                         {expDate.toLocaleDateString('it-IT')}
-                                        {isExpiringSoon && <span className="ml-2 text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded uppercase font-black tracking-widest">In Scadenza</span>}
+                                        {isExpiringSoon && <span className="ml-2 text-[10px] bg-amber-200/50 backdrop-blur-sm text-amber-800 border border-amber-300/50 px-2 py-1 rounded-md uppercase font-black tracking-widest shadow-sm">In Scadenza</span>}
                                       </td>
-                                      <td className="px-6 py-3 text-right font-black text-primary">{lot.current_quantity}</td>
+                                      <td className="px-6 py-4 text-right font-black text-primary text-lg">{lot.current_quantity}</td>
                                     </tr>
                                   );
                                 })}
@@ -305,8 +313,11 @@ export default function ProductCatalog() {
         <LotManagerModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />
       )}
       
-      {isCreatingProduct && (
-        <ProductCreateModal onClose={() => setIsCreatingProduct(false)} />
+      {(isCreatingProduct || productToEdit) && (
+        <ProductCreateModal 
+          onClose={() => { setIsCreatingProduct(false); setProductToEdit(null); }} 
+          productToEdit={productToEdit} 
+        />
       )}
     </div>
   );
