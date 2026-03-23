@@ -1,37 +1,45 @@
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, ShieldAlert, AlertCircle } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft, ShieldAlert, AlertCircle, RotateCcw, Loader2 } from 'lucide-react';
 import { apiServices } from '@/lib/api';
+import { toast } from 'react-hot-toast';
 
 export default function QuarantineList() {
+  const queryClient = useQueryClient();
   const { data: products, isLoading: pLoading, isError: pError } = useQuery({ queryKey:['products'], queryFn: apiServices.getProducts });
   const { data: lotsData, isLoading: lLoading, isError: lError } = useQuery({ queryKey:['lots'], queryFn: apiServices.getLots });
-  const { data: movements, isLoading: mLoading, isError: mError } = useQuery({ queryKey:['movements'], queryFn: apiServices.getMovements });
 
-  const isLoading = pLoading || lLoading || mLoading;
-  const isError = pError || lError || mError;
+  const restoreMutation = useMutation({
+    mutationFn: (productId: string | number) => apiServices.restoreQuarantineProduct(productId),
+    onSuccess: () => {
+      toast.success('Prodotto rimosso dalla quarantena');
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['lots'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+    onError: (err: any) => {
+      toast.error(err.message || 'Errore durante il ripristino');
+    }
+  });
+
+  const isLoading = pLoading || lLoading;
+  const isError = pError || lError;
 
   const safeProducts = Array.isArray(products?.results || products) ? (products?.results || products) : [];
   const safeLots = Array.isArray(lotsData?.results || lotsData) ? (lotsData?.results || lotsData) : [];
-  const safeMovements = Array.isArray(movements?.results || movements) ? (movements?.results || movements) : [];
 
-  // Find all lot IDs that have been quarantined at least once
-  const quarantinedLotIds = new Set(safeMovements.filter((m:any) => m.movement_type === 'QUARANTINE').map((m:any) => m.lot));
-
-  const lots = safeLots.filter((l:any) => quarantinedLotIds.has(l.id)).map((l:any) => {
-    const prod = safeProducts.find((p:any) => p.id === l.product);
-    // Find the latest quarantine movement for notes/date
-    const qMoves = safeMovements.filter((m:any) => m.lot === l.id && m.movement_type === 'QUARANTINE').sort((a:any, b:any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-    const latestMove = qMoves[0];
+  const productsInQuarantine = safeProducts.filter((p: any) => p.is_quarantined).map((product: any) => {
+    // Calculate total quantity across all lots for this product
+    const productLots = safeLots.filter((l: any) => l.product === product.id);
+    const totalQty = productLots.reduce((acc: number, lot: any) => acc + lot.current_quantity, 0);
     
     return {
-      id: l.id,
-      lot_number: l.lot_number,
-      quantity: l.current_quantity,
-      product: prod || { id: l.product, name: 'Sconosciuto', sku: 'N/A' },
-      status: 'QUARANTINE',
-      notes: latestMove?.notes || 'Stato quarantena attivato dal sistema',
-      created_at: latestMove?.timestamp || new Date().toISOString()
+      id: product.id,
+      name: product.name,
+      sku: product.sku,
+      quantity: totalQty,
+      notes: product.quarantine_reason || 'Nessuna nota',
+      created_at: product.quarantined_at || new Date().toISOString()
     };
   });
 
@@ -66,28 +74,38 @@ export default function QuarantineList() {
             <AlertCircle size={48} className="mb-4 opacity-50" />
             <p className="font-semibold text-lg">Errore nel caricamento dei dati di quarantena</p>
           </div>
-        ) : lots?.length === 0 ? (
+        ) : productsInQuarantine?.length === 0 ? (
           <div className="text-center py-12 text-emerald-600">
             <ShieldAlert size={48} className="mx-auto mb-4 opacity-30" />
             <p className="font-medium text-lg">Nessun articolo in quarantena al momento.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {lots?.map((lot: any) => (
-              <div key={lot.id} className="p-6 bg-white/50 backdrop-blur-sm border border-rose-200 shadow-sm rounded-2xl hover:shadow-md hover:bg-white/80 transition-all flex flex-col justify-between">
+            {productsInQuarantine?.map((item: any) => (
+              <div key={item.id} className="p-6 bg-white/50 backdrop-blur-sm border border-rose-200 shadow-sm rounded-2xl hover:shadow-md hover:bg-white/80 transition-all flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-start mb-4">
                     <span className="px-3 py-1 bg-rose-100 text-rose-700 text-xs font-black uppercase tracking-wider rounded-lg border border-rose-200">
-                      Lotto: {lot.lot_number}
+                      Prodotto
                     </span>
-                    <span className="text-xl font-black text-rose-600">{lot.quantity} pz</span>
+                    <span className="text-xl font-black text-rose-600">{item.quantity} pz</span>
                   </div>
-                  <h3 className="font-bold text-slate-800 text-lg leading-tight mb-1">{lot.product.name}</h3>
-                  <p className="text-sm font-mono text-slate-500 mb-4">{lot.product.sku}</p>
+                  <h3 className="font-bold text-slate-800 text-lg leading-tight mb-1">{item.name}</h3>
+                  <p className="text-sm font-mono text-slate-500 mb-4">{item.sku}</p>
                 </div>
-                <div className="pt-4 border-t border-rose-100">
-                  <p className="text-sm text-slate-600 italic">"{lot.notes || 'Nessuna nota specificata'}"</p>
-                  <p className="text-xs text-slate-400 mt-2 font-medium">Registrato: {new Date(lot.created_at).toLocaleDateString()}</p>
+                <div className="pt-4 border-t border-rose-100 space-y-4">
+                  <div>
+                    <p className="text-sm text-slate-600 italic">"{item.notes}"</p>
+                    <p className="text-xs text-slate-400 mt-1 font-medium italic">Registrato: {new Date(item.created_at).toLocaleDateString()}</p>
+                  </div>
+                  <button
+                    onClick={() => restoreMutation.mutate(item.id)}
+                    disabled={restoreMutation.isPending}
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-500 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-md active:scale-95 disabled:opacity-50"
+                  >
+                    {restoreMutation.isPending ? <Loader2 className="animate-spin" size={16} /> : <RotateCcw size={16} />}
+                    Ripristina Prodotto
+                  </button>
                 </div>
               </div>
             ))}

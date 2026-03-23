@@ -57,6 +57,8 @@ export default function Movimenti() {
       toast.success('Stock aggiunto con successo!');
       queryClient.invalidateQueries({ queryKey: ['movements'] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['lots'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       resetForm();
     },
     onError: (err: any) => {
@@ -70,6 +72,8 @@ export default function Movimenti() {
       toast.success('Stock rimosso con successo!');
       queryClient.invalidateQueries({ queryKey: ['movements'] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['lots'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       resetForm();
     },
     onError: (err: any) => {
@@ -83,6 +87,8 @@ export default function Movimenti() {
       toast.success('Prodotto messo in quarantena!');
       queryClient.invalidateQueries({ queryKey: ['movements'] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['lots'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       resetForm();
     },
     onError: (err: any) => {

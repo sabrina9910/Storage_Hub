@@ -18,6 +18,9 @@ export default function Blacklist() {
       toast.success('Prodotto ripristinato con successo!');
       queryClient.invalidateQueries({ queryKey: ['blacklistedProducts'] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['lots'] });
+      queryClient.invalidateQueries({ queryKey: ['movements'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
     onError: (err: any) => {
       toast.error(err.message || 'Errore durante il ripristino');

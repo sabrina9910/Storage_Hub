@@ -1,0 +1,9 @@
+Ho risolto il problema per cui non era possibile mettere i prodotti in quarantena.
+
+Il problema era dovuto a una discrepanza tra il frontend e il backend:
+- Il frontend inviava la richiesta all'endpoint errato (`/api/products/{id}/quarantine/`) inviando solo l'ID.
+- Il backend, invece, si aspettava la richiesta sull'endpoint dell'API dei movimenti (`/api/movements/quarantine/`) con un payload contenente il \`product_id\` e un \`reason\` opzionale.
+
+Ho corretto il metodo \`quarantineProduct\` nel file \`frontend/src/lib/api.ts\`. Ora il frontend comunicherà correttamente con il backend, permettendo l'inserimento in quarantena attraverso i componenti e le aree dedicate.
+
+Puoi provare nuovamente a mettere il prodotto in quarantena!

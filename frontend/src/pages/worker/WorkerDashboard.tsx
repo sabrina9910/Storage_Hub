@@ -4,6 +4,7 @@ import { apiServices } from '@/lib/api';
 import { Clock, Activity, ArrowLeftRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
+import QuarantineWidget from '@/components/admin/QuarantineWidget';
 
 export default function WorkerDashboard() {
   const [time, setTime] = useState(new Date());
@@ -126,6 +127,10 @@ export default function WorkerDashboard() {
             </table>
           </div>
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6">
+        <QuarantineWidget />
       </div>
     </div>
   );

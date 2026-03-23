@@ -165,6 +165,9 @@ class StockMovementViewSet(viewsets.ModelViewSet):
         except Product.DoesNotExist:
             return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
         
+        if product.is_quarantined:
+            return Response({'error': f'Product {product.sku} is currently in QUARANTINE and cannot be moved.'}, status=status.HTTP_400_BAD_REQUEST)
+
         with transaction.atomic():
             # Get active lots with stock
             lots = product.lots.filter(is_active=True, current_quantity__gt=0).order_by('expiration_date')
@@ -229,6 +232,8 @@ class StockMovementViewSet(viewsets.ModelViewSet):
         with transaction.atomic():
             product.is_quarantined = True
             product.quarantine_reason = reason
+            product.quarantined_at = timezone.now()
+            product.quarantined_by = request.user
             product.save()
             
             # Calculate total quantity

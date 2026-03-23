@@ -10,7 +10,7 @@ interface RecentMovementsProps {
 export default function RecentMovements({ limit = 10 }: RecentMovementsProps) {
   const { data: recentLogs, isLoading } = useQuery({
     queryKey: ['recentAuditLogs', limit],
-    queryFn: () => apiServices.getRecentAuditLogs(limit),
+    queryFn: () => apiServices.getAuditLogs(`limit=${limit}`),
   });
 
   const logsList = Array.isArray(recentLogs) ? recentLogs : [];
