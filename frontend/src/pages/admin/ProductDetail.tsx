@@ -76,7 +76,8 @@ export default function ProductDetail() {
     }
   };
 
-  const handleExport = async (format: 'csv' | 'xlsx' | 'xml' | 'pdf') => {
+  const handleExport = async (e: React.MouseEvent, format: 'csv' | 'xlsx' | 'xml' | 'pdf') => {
+    e.preventDefault();
     if (!id) return;
     try {
       const token = localStorage.getItem('access_token');
@@ -180,20 +181,20 @@ export default function ProductDetail() {
                </div>
              </div>
            </div>
-           <div className="flex gap-2">
-             <button onClick={() => handleExport('csv')} className="px-4 py-2 bg-white hover:bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-sm hover:shadow">
-               <Download size={16} /> CSV
-             </button>
-             <button onClick={() => handleExport('xlsx')} className="px-4 py-2 bg-white hover:bg-blue-50 border border-blue-200 text-blue-700 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-sm hover:shadow">
-               <Download size={16} /> XLSX
-             </button>
-             <button onClick={() => handleExport('xml')} className="px-4 py-2 bg-white hover:bg-purple-50 border border-purple-200 text-purple-700 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-sm hover:shadow">
-               <Download size={16} /> XML
-             </button>
-             <button onClick={() => handleExport('pdf')} className="px-4 py-2 bg-white hover:bg-rose-50 border border-rose-200 text-rose-700 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-sm hover:shadow">
-               <Download size={16} /> PDF
-             </button>
-           </div>
+            <div className="flex gap-2">
+              <button type="button" onClick={(e) => handleExport(e, 'csv')} className="px-4 py-2 bg-white hover:bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-sm hover:shadow">
+                <Download size={16} /> CSV
+              </button>
+              <button type="button" onClick={(e) => handleExport(e, 'xlsx')} className="px-4 py-2 bg-white hover:bg-blue-50 border border-blue-200 text-blue-700 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-sm hover:shadow">
+                <Download size={16} /> XLSX
+              </button>
+              <button type="button" onClick={(e) => handleExport(e, 'xml')} className="px-4 py-2 bg-white hover:bg-purple-50 border border-purple-200 text-purple-700 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-sm hover:shadow">
+                <Download size={16} /> XML
+              </button>
+              <button type="button" onClick={(e) => handleExport(e, 'pdf')} className="px-4 py-2 bg-white hover:bg-rose-50 border border-rose-200 text-rose-700 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-sm hover:shadow">
+                <Download size={16} /> PDF
+              </button>
+            </div>
         </div>
       </div>
 

@@ -260,7 +260,7 @@ class StockMovementViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='export/xlsx')
     def export_xlsx(self, request):
         if not OPENPYXL_AVAILABLE:
-            return Response({'error': 'openpyxl not installed'}, status=500)
+            return Response({'error': 'openpyxl non installata'}, status=500)
         
         movements = self.get_queryset()
         
@@ -269,21 +269,25 @@ class StockMovementViewSet(viewsets.ModelViewSet):
         
         wb = openpyxl.Workbook()
         ws = wb.active
-        ws.title = 'Movimenti'
+        ws.title = 'Registro Movimenti'
         
         headers = ['Data e Ora', 'Prodotto', 'SKU', 'Tipo Azione', 'Quantità', 'Operatore', 'Ruolo', 'Note']
         ws.append(headers)
         
+        header_fill = openpyxl.styles.PatternFill(start_color="1e293b", end_color="1e293b", fill_type="solid")
+        header_font = openpyxl.styles.Font(color="FFFFFF", bold=True)
+        
         for cell in ws[1]:
-            cell.font = Font(bold=True)
-            cell.alignment = Alignment(horizontal='center')
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal='center', vertical='center')
         
         for mov in movements:
             product_name = mov.product.name if mov.product else (mov.lot.product.name if mov.lot else 'N/A')
             product_sku = mov.product.sku if mov.product else (mov.lot.product.sku if mov.lot else 'N/A')
             
             ws.append([
-                mov.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                mov.timestamp.strftime('%d/%m/%Y %H:%M:%S'),
                 product_name,
                 product_sku,
                 mov.get_movement_type_display(),
@@ -293,51 +297,74 @@ class StockMovementViewSet(viewsets.ModelViewSet):
                 mov.notes
             ])
         
+        # Adjust Column Widths
+        widths = [20, 45, 15, 15, 12, 25, 15, 50]
+        for i, width in enumerate(widths, 1):
+            ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = width
+            
         wb.save(response)
         return response
 
     @action(detail=False, methods=['get'], url_path='export/pdf')
     def export_pdf(self, request):
         if not REPORTLAB_AVAILABLE:
-            return Response({'error': 'reportlab not installed'}, status=500)
+            return Response({'error': 'reportlab non installata'}, status=500)
         
-        movements = self.get_queryset()[:100]  # Limit for PDF
+        movements = self.get_queryset()[:200]  # Increase limit slightly for better report
         
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="movimenti_{timezone.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
         
-        doc = SimpleDocTemplate(response, pagesize=letter)
+        doc = SimpleDocTemplate(response, pagesize=letter, leftMargin=0.5*inch, rightMargin=0.5*inch, topMargin=0.5*inch, bottomMargin=0.5*inch)
         elements = []
         styles = getSampleStyleSheet()
         
-        title = Paragraph("<b>Riepilogo Movimenti</b>", styles['Title'])
+        header_style = styles['Heading1']
+        header_style.textColor = colors.HexColor('#1e293b') # Slate-800
+        
+        title = Paragraph("Registro Movimenti di Magazzino", header_style)
         elements.append(title)
+        elements.append(Paragraph(f"Generato il: {timezone.now().strftime('%d/%m/%Y %H:%M')}", styles['Normal']))
         elements.append(Spacer(1, 0.3*inch))
         
-        data = [['Data', 'Prodotto', 'Tipo', 'Qtà', 'Operatore']]
+        # Cell style for wrapping
+        cell_style = styles['Normal']
+        cell_style.fontSize = 8
+        cell_style.leading = 10
+        
+        data = [['Data/Ora', 'Prodotto', 'Tipo', 'Qtà', 'Operatore']]
         
         for mov in movements:
             product_name = mov.product.name if mov.product else (mov.lot.product.name if mov.lot else 'N/A')
             data.append([
-                mov.timestamp.strftime('%Y-%m-%d %H:%M'),
-                product_name[:20],
-                mov.movement_type,
+                mov.timestamp.strftime('%d/%m/%Y %H:%M'),
+                Paragraph(product_name, cell_style),
+                mov.get_movement_type_display(),
                 str(mov.quantity),
-                (mov.user_full_name or mov.user_email)[:15] if mov.user_full_name or mov.user_email else 'N/A'
+                Paragraph(mov.user_full_name or mov.user_email or 'N/A', cell_style)
             ])
         
-        table = Table(data, colWidths=[1.5*inch, 2*inch, 1*inch, 0.7*inch, 1.5*inch])
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        table = Table(data, colWidths=[1.2*inch, 3.2*inch, 1.2*inch, 0.7*inch, 1.2*inch])
+        
+        table_style = [
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e293b')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, 0), 10),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),
-            ('FONTSIZE', (0, 1), (-1, -1), 8),
-        ]))
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ]
+        
+        # Zebra coloring
+        for i in range(1, len(data)):
+            if i % 2 == 0:
+                table_style.append(('BACKGROUND', (0, i), (-1, i), colors.HexColor('#f1f5f9')))
+        
+        table.setStyle(TableStyle(table_style))
         
         elements.append(table)
         doc.build(elements)

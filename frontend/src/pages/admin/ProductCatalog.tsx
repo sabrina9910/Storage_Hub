@@ -63,7 +63,8 @@ export default function ProductCatalog() {
     onError: (err: any) => toast.error(err.message || 'Errore importazione')
   });
 
-  const handleExport = async (format: 'xlsx' | 'pdf') => {
+  const handleExport = async (e: React.MouseEvent, format: 'xlsx' | 'pdf') => {
+    e.preventDefault();
     try {
       toast.loading('Generazione file...', { id: 'export' });
       const blob = format === 'xlsx' 
@@ -192,14 +193,16 @@ export default function ProductCatalog() {
           {/* New Export/Import Buttons */}
           <div className="flex items-center gap-2">
             <button 
-              onClick={() => handleExport('xlsx')}
+              type="button"
+              onClick={(e) => handleExport(e, 'xlsx')}
               className="p-3 bg-white/60 hover:bg-white/80 border border-white/50 text-emerald-600 rounded-2xl shadow-sm transition-all active:scale-95"
               title="Esporta Catalogo XLSX"
             >
               <FileSpreadsheet size={20} />
             </button>
             <button 
-              onClick={() => handleExport('pdf')}
+              type="button"
+              onClick={(e) => handleExport(e, 'pdf')}
               className="p-3 bg-white/60 hover:bg-white/80 border border-white/50 text-rose-600 rounded-2xl shadow-sm transition-all active:scale-95"
               title="Esporta Catalogo PDF"
             >

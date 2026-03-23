@@ -43,7 +43,8 @@ export default function SupplierDetail() {
     setFormData({});
   };
 
-  const handleExport = async (format: 'xlsx' | 'pdf') => {
+  const handleExport = async (e: React.MouseEvent, format: 'xlsx' | 'pdf') => {
+    e.preventDefault();
     try {
       toast.loading('Generazione catalogo...', { id: 'export-supplier' });
       const blob = format === 'xlsx' 
@@ -161,14 +162,16 @@ export default function SupplierDetail() {
               {supplier.products && supplier.products.length > 0 && (
                 <div className="flex gap-2">
                   <button 
-                    onClick={() => handleExport('xlsx')}
+                    type="button"
+                    onClick={(e) => handleExport(e, 'xlsx')}
                     className="p-1.5 hover:bg-emerald-50 text-emerald-600 rounded-lg transition-colors border border-emerald-100"
                     title="Scarica Catalogo Excel"
                   >
                     <FileSpreadsheet size={16} />
                   </button>
                   <button 
-                    onClick={() => handleExport('pdf')}
+                    type="button"
+                    onClick={(e) => handleExport(e, 'pdf')}
                     className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors border border-rose-100"
                     title="Scarica Catalogo PDF"
                   >

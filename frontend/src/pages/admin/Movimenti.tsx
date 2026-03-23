@@ -133,7 +133,8 @@ export default function Movimenti() {
     }
   };
 
-  const handleExport = async (format: 'xlsx' | 'pdf') => {
+  const handleExport = async (e: React.MouseEvent, format: 'xlsx' | 'pdf') => {
+    e.preventDefault();
     try {
       const token = localStorage.getItem('access_token');
       const params = buildQueryParams();
@@ -315,13 +316,15 @@ export default function Movimenti() {
           <h2 className="text-2xl font-black text-slate-800">Riepilogo Movimenti</h2>
           <div className="flex gap-2">
             <button
-              onClick={() => handleExport('xlsx')}
+              type="button"
+              onClick={(e) => handleExport(e, 'xlsx')}
               className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-sm flex items-center gap-2 transition-all"
             >
               <Download size={16} /> XLSX
             </button>
             <button
-              onClick={() => handleExport('pdf')}
+              type="button"
+              onClick={(e) => handleExport(e, 'pdf')}
               className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold text-sm flex items-center gap-2 transition-all"
             >
               <Download size={16} /> PDF
