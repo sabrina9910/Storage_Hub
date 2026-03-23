@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiServices } from '@/lib/api';
-import { ArrowLeft, Edit2, Save, X, Building2, User, Phone, Mail, Globe, MapPin, CreditCard, FileText, Package } from 'lucide-react';
+import { ArrowLeft, Edit2, Save, X, Building2, User, Phone, Mail, Globe, MapPin, CreditCard, FileText, Package, FileSpreadsheet } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 export default function SupplierDetail() {
@@ -42,6 +42,28 @@ export default function SupplierDetail() {
     setIsEditing(false);
     setFormData({});
   };
+
+  const handleExport = async (format: 'xlsx' | 'pdf') => {
+    try {
+      toast.loading('Generazione catalogo...', { id: 'export-supplier' });
+      const blob = format === 'xlsx' 
+        ? await apiServices.exportSupplierCatalogXlsx(id!)
+        : await apiServices.exportSupplierCatalogPdf(id!);
+      
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `catalogo_${supplier.name.replace(/\s+/g, '_')}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Download avviato!', { id: 'export-supplier' });
+    } catch (error) {
+      toast.error('Errore durante il download del catalogo', { id: 'export-supplier' });
+    }
+  };
+
 
   if (isLoading) return <div className="p-8 text-slate-500">Caricamento...</div>;
   if (!supplier) return <div className="p-8 text-slate-500">Fornitore non trovato</div>;
@@ -132,9 +154,29 @@ export default function SupplierDetail() {
 
         <div className="space-y-6">
           <div className="glass-card p-6">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-              <Package size={14} /> Prodotti Associati
-            </h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <Package size={14} /> Prodotti Associati
+              </h3>
+              {supplier.products && supplier.products.length > 0 && (
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => handleExport('xlsx')}
+                    className="p-1.5 hover:bg-emerald-50 text-emerald-600 rounded-lg transition-colors border border-emerald-100"
+                    title="Scarica Catalogo Excel"
+                  >
+                    <FileSpreadsheet size={16} />
+                  </button>
+                  <button 
+                    onClick={() => handleExport('pdf')}
+                    className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors border border-rose-100"
+                    title="Scarica Catalogo PDF"
+                  >
+                    <FileText size={16} />
+                  </button>
+                </div>
+              )}
+            </div>
             {supplier.products && supplier.products.length > 0 ? (
               <div className="space-y-2">
                 {supplier.products.map((product: any) => (
@@ -151,6 +193,7 @@ export default function SupplierDetail() {
           </div>
         </div>
       </div>
+
     </div>
   );
 }
