@@ -219,6 +219,25 @@ export const apiServices = {
   createSupplier: (data: any) => fetchApi('/suppliers/', { method: 'POST', body: JSON.stringify(data) }),
   updateSupplier: (id: number | string, data: any) => fetchApi(`/suppliers/${id}/`, { method: 'PATCH', body: JSON.stringify(data) }),
 
+  exportSupplierCatalogXlsx: async (id: string | number) => {
+    const token = localStorage.getItem('access_token');
+    const response = await fetch(`${API_URL}/suppliers/${id}/export-catalog/xlsx/`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error('Download fallito');
+    return response.blob();
+  },
+
+  exportSupplierCatalogPdf: async (id: string | number) => {
+    const token = localStorage.getItem('access_token');
+    const response = await fetch(`${API_URL}/suppliers/${id}/export-catalog/pdf/`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error('Download fallito');
+    return response.blob();
+  },
+
+
   // Logs & Tools
   getAuditLogs: (paramsString?: string) => fetchApi(`/audit-log/${paramsString ? `?${paramsString}` : ''}`),
   askChatbot: (data: any) => fetchApi('/chatbot/ask/', { method: 'POST', body: JSON.stringify(data) }),

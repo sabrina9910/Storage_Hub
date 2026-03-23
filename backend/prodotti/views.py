@@ -45,9 +45,14 @@ class ProductViewSet(viewsets.ModelViewSet):
     filterset_class = ProductFilter
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve', 'alerts', 'restore_quarantine']:
+        if self.action in [
+            'list', 'retrieve', 'alerts', 'restore_quarantine', 
+            'export_xlsx', 'export_pdf', 'export_xml', 'export_csv',
+            'export_catalog_xlsx', 'export_catalog_pdf', 'import_catalog_xlsx'
+        ]:
             return [IsMagazziniere()]
         return [IsAmministratore()]
+
 
     def get_queryset(self):
         user = self.request.user

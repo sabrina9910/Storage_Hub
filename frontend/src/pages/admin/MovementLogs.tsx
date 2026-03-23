@@ -54,34 +54,21 @@ export default function MovementLogs() {
   // Enriched Data combining relations
   const enrichedMovements = useMemo(() => {
     if (isLoading) return [];
-    return safeMovements.map((m: MovementItem) => {
-      const lot = safeLots.find((l: ModelBase) => l.id === m.lot);
-      const product = lot ? safeProducts.find((p: ModelBase) => p.id === lot.product) : null;
-      const user = safeUsers.find((u: ModelBase) => u.id === m.user);
+    return safeMovements.map((m: any) => {
+      // Use backend provided fields if available, otherwise fallback to local lookup
+      const lot = safeLots.find((l: any) => l.id === m.lot);
+      const user = safeUsers.find((u: any) => u.id === m.user);
       
-      const foodMocks = [
-        { name: 'Parmigiano Reggiano DOP 24 Mesi' },
-        { name: 'Latte Intero UHT 1L' },
-        { name: 'Pasta di Gragnano IGP 500g' },
-        { name: 'Olio Extra Vergine Oliva 1L' },
-        { name: 'Prosciutto di Parma DOP' },
-      ];
-      
-      let mockName = product?.name ? String(product.name) : 'N/D';
-      if (product?.id) {
-        const stableIndex = Math.abs(String(product.id).split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % foodMocks.length;
-        mockName = foodMocks[stableIndex].name;
-      }
-
       return {
         ...m,
-        lot_number: lot?.lot_number ? String(lot.lot_number) : 'N/D',
-        sku: product?.sku ? String(product.sku) : 'N/D',
-        product_name: mockName,
-        user_email: user?.email ? String(user.email) : 'Sistema'
+        lot_number: m.lot_number || (lot?.lot_number ? String(lot.lot_number) : 'N/D'),
+        sku: m.product_sku || (m.product_detail?.sku) || 'N/D',
+        product_name: m.product_name || (m.product_detail?.name) || 'N/D',
+        user_email: m.user_email || (user?.email ? String(user.email) : 'Sistema')
       };
-    }).sort((a: MovementItem, b: MovementItem) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    }).sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }, [safeMovements, safeLots, safeProducts, safeUsers, isLoading]);
+
 
   // Filtering Logic (frontend fallback for complex dates if backend isn't handling it, though we pass it anyway)
   const filteredMovements = useMemo(() => {
