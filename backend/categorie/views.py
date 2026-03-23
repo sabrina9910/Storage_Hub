@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from core.permissions import IsMagazziniere
+from core.permissions import IsMagazziniere, IsAmministratore
 from .models import Category
 from .serializers import CategorySerializer
 

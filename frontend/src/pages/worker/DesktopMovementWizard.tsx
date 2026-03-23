@@ -283,9 +283,9 @@ export default function DesktopMovementWizard() {
                       value={quantity}
                       onChange={(e) => setQuantity(e.target.value)}
                       placeholder="0"
-                      className="w-full text-4xl font-black text-slate-800 tabular-nums py-2 px-4 rounded-xl border-2 border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/20 outline-none bg-white transition-all"
+                      className="w-full text-4xl font-black text-slate-800 tabular-nums py-2 pl-4 pr-20 rounded-xl border-2 border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/20 outline-none bg-white transition-all"
                     />
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold uppercase text-xs tracking-widest">
+                    <div className="absolute right-8 top-1/2 -translate-y-1/2 text-slate-400 font-bold uppercase text-xs tracking-widest pointer-events-none">
                        UNITÀ
                     </div>
                  </div>

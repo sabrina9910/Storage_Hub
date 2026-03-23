@@ -1,26 +1,29 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, AlertTriangle, AlertCircle } from 'lucide-react';
-import { fetchApi } from '@/lib/api';
-
-interface LowStockItem {
-  product_id: number;
-  sku: string;
-  name: string;
-  total_quantity: number;
-  min_stock_level: number;
-  deficit: number;
-}
-
-const fetchLowStockAlerts = async (): Promise<LowStockItem[]> => {
-  return await fetchApi('/reports/alert_report/');
-};
+import { apiServices } from '@/lib/api';
 
 export default function LowStockAlerts() {
-  const { data: alerts, isLoading, isError } = useQuery({
-    queryKey: ['low-stock-alerts'],
-    queryFn: fetchLowStockAlerts,
-  });
+  const { data: products, isLoading: pLoading, isError: pError } = useQuery({ queryKey:['products'], queryFn: apiServices.getProducts });
+  const { data: lots, isLoading: lLoading, isError: lError } = useQuery({ queryKey:['lots'], queryFn: apiServices.getLots });
+
+  const isLoading = pLoading || lLoading;
+  const isError = pError || lError;
+
+  const safeProducts = Array.isArray(products?.results || products) ? (products?.results || products) : [];
+  const safeLots = Array.isArray(lots?.results || lots) ? (lots?.results || lots) : [];
+
+  const alerts = safeProducts.map((p:any) => {
+    const totalQty = safeLots.filter((l:any) => l.product === p.id).reduce((acc:number, cur:any) => acc + cur.current_quantity, 0);
+    return {
+      product_id: p.id,
+      name: p.name,
+      sku: p.sku,
+      min_stock_level: p.min_stock_threshold,
+      total_quantity: totalQty,
+      deficit: p.min_stock_threshold - totalQty
+    };
+  }).filter((a: any) => a.total_quantity < a.min_stock_level && a.min_stock_level > 0);
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -71,7 +74,7 @@ export default function LowStockAlerts() {
                 </tr>
               </thead>
               <tbody>
-                {alerts?.map((alert, idx) => (
+                {alerts?.map((alert: any, idx: number) => (
                   <tr key={idx} className="border-b border-amber-100 last:border-0 hover:bg-white/60 transition-colors">
                     <td className="p-4 font-semibold text-slate-800">{alert.name}</td>
                     <td className="p-4 font-mono text-sm font-semibold text-slate-500 text-center">{alert.sku}</td>

@@ -50,9 +50,14 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="glass-card w-full max-w-md p-8 text-center space-y-6">
-        <div className="w-16 h-16 bg-primary rounded-2xl mx-auto flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-primary/30">
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Decorative gradient orbs for premium glassmorphism background */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-indigo-300/30 rounded-full blur-3xl mix-blend-multiply pointer-events-none animate-pulse"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40rem] h-[40rem] bg-sky-300/30 rounded-full blur-3xl mix-blend-multiply pointer-events-none animate-pulse" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute top-[20%] right-[20%] w-[20rem] h-[20rem] bg-purple-300/20 rounded-full blur-3xl mix-blend-multiply pointer-events-none"></div>
+
+      <div className="glass-card w-full max-w-md p-10 text-center space-y-8 relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
+        <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary-dark rounded-3xl mx-auto flex items-center justify-center text-white font-black text-4xl shadow-xl shadow-primary/40 border border-white/20 transform hover:scale-105 transition-transform duration-300">
           S
         </div>
         <div>
@@ -66,10 +71,10 @@ export default function Login() {
             <input
               type="email"
               {...register('email', { required: "L'email è obbligatoria" })}
-              className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+              className="w-full px-5 py-3 bg-white/40 backdrop-blur-md border border-white/40 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:bg-white/70 outline-none transition-all duration-300 focus:shadow-inner text-slate-800 placeholder-slate-400 font-medium"
               placeholder="admin@example.com"
             />
-            {errors.email && <span className="text-xs text-error mt-1">{errors.email.message}</span>}
+            {errors.email && <span className="text-xs text-error mt-1.5 font-medium flex items-center gap-1">⚠ {errors.email.message}</span>}
           </div>
 
           <div>
@@ -77,10 +82,10 @@ export default function Login() {
             <input
               type="password"
               {...register('password', { required: 'La password è obbligatoria' })}
-              className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+              className="w-full px-5 py-3 bg-white/40 backdrop-blur-md border border-white/40 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:bg-white/70 outline-none transition-all duration-300 focus:shadow-inner text-slate-800 placeholder-slate-400 font-medium"
               placeholder="••••••••"
             />
-            {errors.password && <span className="text-xs text-error mt-1">{errors.password.message}</span>}
+            {errors.password && <span className="text-xs text-error mt-1.5 font-medium flex items-center gap-1">⚠ {errors.password.message}</span>}
           </div>
 
           <button

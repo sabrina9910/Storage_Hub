@@ -31,7 +31,7 @@ export default function BlacklistModal({ isOpen, onClose, onConfirm, isPending }
           <button
             onClick={onClose}
             disabled={isPending}
-            className="p-2 hover:bg-slate-100 rounded-full transition-colors disabled:opacity-50"
+            className="p-2 text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 shadow-sm rounded-full transition-all disabled:opacity-50"
           >
             <X size={20} />
           </button>

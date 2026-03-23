@@ -1,31 +1,36 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, DollarSign, AlertCircle, TrendingUp } from 'lucide-react';
-import { fetchApi } from '@/lib/api';
-
-interface InventoryLot {
-  id: number;
-  product: { id: number; name: string; sku: string };
-  lot_number: string;
-  quantity: number;
-  unit_cost: string | number;
-  total_value: number;
-}
-
-interface InventoryValuation {
-  total_value: number;
-  lots: InventoryLot[];
-}
-
-const fetchInventoryValue = async (): Promise<InventoryValuation> => {
-  return await fetchApi('/reports/inventory_value/');
-};
+import { apiServices } from '@/lib/api';
 
 export default function InventoryValue() {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['inventory-value'],
-    queryFn: fetchInventoryValue,
-  });
+  const { data: products, isLoading: pLoading, isError: pError } = useQuery({ queryKey:['products'], queryFn: apiServices.getProducts });
+  const { data: lots, isLoading: lLoading, isError: lError } = useQuery({ queryKey:['lots'], queryFn: apiServices.getLots });
+
+  const isLoading = pLoading || lLoading;
+  const isError = pError || lError;
+
+  const safeProducts = Array.isArray(products?.results || products) ? (products?.results || products) : [];
+  const safeLots = Array.isArray(lots?.results || lots) ? (lots?.results || lots) : [];
+
+  let total_value = 0;
+  const inventoryLots = safeLots.map((l:any) => {
+    const prod = safeProducts.find((p:any) => p.id === l.product);
+    const unit_cost = prod ? Number(prod.unit_price) : 0;
+    const lot_total = unit_cost * l.current_quantity;
+    total_value += lot_total;
+    
+    return {
+      id: l.id,
+      lot_number: l.lot_number,
+      quantity: l.current_quantity,
+      unit_cost: unit_cost,
+      total_value: lot_total,
+      product: prod || { id: l.product, name: 'Sconosciuto', sku: 'N/A' }
+    };
+  }).filter((l: any) => l.quantity > 0);
+
+  const data = { total_value, lots: inventoryLots };
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -93,7 +98,7 @@ export default function InventoryValue() {
                 </tr>
               </thead>
               <tbody>
-                {data.lots.map((lot) => (
+                {data.lots.map((lot: any) => (
                   <tr key={lot.id} className="border-b border-emerald-50/50 last:border-0 hover:bg-white/60 transition-colors">
                     <td className="p-4 font-mono text-sm font-semibold text-slate-600">
                       <span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-md border border-emerald-200">{lot.lot_number}</span>

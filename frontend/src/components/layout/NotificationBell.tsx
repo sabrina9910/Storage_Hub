@@ -5,6 +5,14 @@ import { apiServices } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 
+interface AlertItem {
+  id: string | number;
+  sku: string;
+  name: string;
+  uid?: string;
+  [key: string]: string | number | boolean | undefined;
+}
+
 export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const [seenIds, setSeenIds] = useState<string[]>(() => {
@@ -23,9 +31,9 @@ export default function NotificationBell() {
   const quarantine = alerts?.quarantine || [];
   
   // Create unique IDs for mapping/tracking
-  const currentAlerts = [
-    ...lowStock.map((a: any) => ({ ...a, uid: `ls-${a.id}` })),
-    ...quarantine.map((a: any) => ({ ...a, uid: `q-${a.id}` }))
+  const currentAlerts: AlertItem[] = [
+    ...lowStock.map((a: AlertItem) => ({ ...a, uid: `ls-${a.id}` })),
+    ...quarantine.map((a: AlertItem) => ({ ...a, uid: `q-${a.id}` }))
   ];
 
   // Count only those not in seenIds
@@ -33,7 +41,7 @@ export default function NotificationBell() {
 
   useEffect(() => {
     if (isOpen && currentAlerts.length > 0) {
-      const allIds = currentAlerts.map(a => a.uid);
+      const allIds = currentAlerts.map(a => a.uid).filter(Boolean) as string[];
       // We only update if there are new IDs to add
       const newSeen = Array.from(new Set([...seenIds, ...allIds]));
       if (newSeen.length !== seenIds.length) {
@@ -86,9 +94,9 @@ export default function NotificationBell() {
               </div>
             ) : (
               <div className="divide-y divide-glass-border/20">
-                {currentAlerts.map((p: any) => {
-                  const isUnseen = !seenIds.includes(p.uid);
-                  const isQuarantine = p.uid.startsWith('q-');
+                {currentAlerts.map((p: AlertItem) => {
+                  const isUnseen = !seenIds.includes(p.uid || '');
+                  const isQuarantine = p.uid?.startsWith('q-');
                   
                   return (
                     <Link

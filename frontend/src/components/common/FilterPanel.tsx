@@ -43,10 +43,10 @@ export default function FilterPanel({ groups, activeFilters, onFilterChange, onR
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "h-12 px-5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm relative active:scale-95 border",
+          "h-12 px-5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-inner relative active:scale-95 border",
           isOpen || activeCount > 0
-            ? "bg-slate-800 border-slate-700 text-white shadow-lg shadow-slate-900/20" 
-            : "bg-white/80 border-slate-200 text-slate-600 hover:bg-white"
+            ? "bg-slate-900/80 backdrop-blur-md border-slate-700 text-white shadow-lg shadow-slate-900/30" 
+            : "bg-white/40 backdrop-blur-md border-white/50 text-slate-700 hover:bg-white/60"
         )}
       >
         <Filter size={18} />
@@ -59,8 +59,8 @@ export default function FilterPanel({ groups, activeFilters, onFilterChange, onR
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-72 bg-white/95 backdrop-blur-xl border border-white shadow-2xl rounded-3xl p-5 z-50 animate-in fade-in zoom-in-95 slide-in-from-top-4 duration-300">
-          <div className="flex justify-between items-center mb-5 pb-3 border-b border-slate-100/80">
+        <div className="absolute right-0 mt-3 w-72 bg-white/95 backdrop-blur-3xl border border-white/80 shadow-2xl shadow-black/10 rounded-3xl p-5 z-[100] animate-in fade-in zoom-in-95 slide-in-from-top-4 duration-300">
+          <div className="flex justify-between items-center mb-5 pb-3 border-b border-white/40">
             <h3 className="font-black text-slate-800 flex items-center gap-2">
               <Filter size={16} className="text-primary" /> Filtri Ricerca
             </h3>

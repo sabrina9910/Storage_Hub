@@ -18,7 +18,7 @@ export default function SearchBar({ value, onChange, placeholder = "Cerca...", i
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full pl-11 pr-12 py-3 rounded-2xl bg-white/60 backdrop-blur-md border border-slate-200 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 text-sm font-semibold text-slate-700 transition-all shadow-sm placeholder:font-medium placeholder:text-slate-400"
+        className="w-full pl-11 pr-12 py-3 rounded-2xl bg-white/40 backdrop-blur-lg border border-white/50 outline-none focus:border-primary/60 focus:ring-4 focus:ring-primary/20 text-sm font-semibold text-slate-800 transition-all shadow-inner hover:bg-white/60 placeholder:font-medium placeholder:text-slate-500"
       />
       {isSearching && (
         <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">

@@ -1,27 +1,38 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, ShieldAlert, AlertCircle } from 'lucide-react';
-import { fetchApi } from '@/lib/api';
-
-interface QuarantineItem {
-  id: string | number;
-  lot_number: string;
-  product: { id: number; name: string; sku: string };
-  quantity: number;
-  status: 'QUARANTINE';
-  notes: string;
-  created_at: string;
-}
-
-const fetchQuarantineLots = async (): Promise<QuarantineItem[]> => {
-  // Replace with exact endpoint, assuming /lots/?status=QUARANTINE or similar
-  return await fetchApi('/inventory/lots/?status=QUARANTINE');
-};
+import { apiServices } from '@/lib/api';
 
 export default function QuarantineList() {
-  const { data: lots, isLoading, isError } = useQuery({
-    queryKey: ['quarantine-lots'],
-    queryFn: fetchQuarantineLots,
+  const { data: products, isLoading: pLoading, isError: pError } = useQuery({ queryKey:['products'], queryFn: apiServices.getProducts });
+  const { data: lotsData, isLoading: lLoading, isError: lError } = useQuery({ queryKey:['lots'], queryFn: apiServices.getLots });
+  const { data: movements, isLoading: mLoading, isError: mError } = useQuery({ queryKey:['movements'], queryFn: apiServices.getMovements });
+
+  const isLoading = pLoading || lLoading || mLoading;
+  const isError = pError || lError || mError;
+
+  const safeProducts = Array.isArray(products?.results || products) ? (products?.results || products) : [];
+  const safeLots = Array.isArray(lotsData?.results || lotsData) ? (lotsData?.results || lotsData) : [];
+  const safeMovements = Array.isArray(movements?.results || movements) ? (movements?.results || movements) : [];
+
+  // Find all lot IDs that have been quarantined at least once
+  const quarantinedLotIds = new Set(safeMovements.filter((m:any) => m.movement_type === 'QUARANTINE').map((m:any) => m.lot));
+
+  const lots = safeLots.filter((l:any) => quarantinedLotIds.has(l.id)).map((l:any) => {
+    const prod = safeProducts.find((p:any) => p.id === l.product);
+    // Find the latest quarantine movement for notes/date
+    const qMoves = safeMovements.filter((m:any) => m.lot === l.id && m.movement_type === 'QUARANTINE').sort((a:any, b:any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    const latestMove = qMoves[0];
+    
+    return {
+      id: l.id,
+      lot_number: l.lot_number,
+      quantity: l.current_quantity,
+      product: prod || { id: l.product, name: 'Sconosciuto', sku: 'N/A' },
+      status: 'QUARANTINE',
+      notes: latestMove?.notes || 'Stato quarantena attivato dal sistema',
+      created_at: latestMove?.timestamp || new Date().toISOString()
+    };
   });
 
   return (
@@ -62,7 +73,7 @@ export default function QuarantineList() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {lots?.map((lot) => (
+            {lots?.map((lot: any) => (
               <div key={lot.id} className="p-6 bg-white/50 backdrop-blur-sm border border-rose-200 shadow-sm rounded-2xl hover:shadow-md hover:bg-white/80 transition-all flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-start mb-4">

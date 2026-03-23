@@ -72,7 +72,7 @@ export const apiServices = {
   
   getCurrentUser: () => fetchApi('/users/me/'),
   
-  updateProfile: (data: any) => fetchApi('/users/update_profile/', {
+  updateProfile: (data: any) => fetchApi('/users/profile/', {
     method: 'PATCH',
     body: data instanceof FormData ? data : JSON.stringify(data),
   }),
@@ -140,6 +140,11 @@ export const apiServices = {
 
   createProduct: (data: any) => fetchApi('/products/', {
     method: 'POST',
+    body: JSON.stringify(data),
+  }),
+
+  updateProduct: (id: number | string, data: any) => fetchApi(`/products/${id}/`, {
+    method: 'PATCH',
     body: JSON.stringify(data),
   }),
 

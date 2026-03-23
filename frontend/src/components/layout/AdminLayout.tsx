@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { LayoutDashboard, PackageSearch, ArrowLeftRight, Users, LogOut, Search, Menu, X, Terminal, Tags, UserCircle, ClipboardList, Ban, FileText } from 'lucide-react';
+import { LayoutDashboard, PackageSearch, ArrowLeftRight, Users, LogOut, Search, Menu, X, Terminal, Tags, UserCircle, ClipboardList, Ban, FileText, ArrowLeft, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { apiServices } from '@/lib/api';
 import NotificationBell from './NotificationBell';
@@ -74,7 +74,12 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-transparent flex relative">
+    <div className="min-h-screen bg-transparent flex relative overflow-hidden">
+      {/* Decorative gradient orbs for global premium glassmorphism background */}
+      <div className="fixed top-[-10%] left-[-10%] w-[50rem] h-[50rem] bg-indigo-300/30 rounded-full blur-3xl mix-blend-multiply pointer-events-none animate-pulse z-0"></div>
+      <div className="fixed bottom-[-10%] right-[-10%] w-[50rem] h-[50rem] bg-sky-300/30 rounded-full blur-3xl mix-blend-multiply pointer-events-none animate-pulse z-0" style={{ animationDelay: '2s' }}></div>
+      <div className="fixed top-[30%] left-[30%] w-[30rem] h-[30rem] bg-purple-300/20 rounded-full blur-3xl mix-blend-multiply pointer-events-none z-0"></div>
+
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
@@ -85,17 +90,19 @@ export default function AdminLayout() {
 
       {/* Floating Left Sidebar */}
       <aside className={cn(
-        "w-64 fixed inset-y-4 left-4 z-50 glass-card flex flex-col transition-all duration-300 ease-in-out md:translate-x-0 overflow-hidden",
+        "w-64 fixed inset-y-4 left-4 z-[60] glass-card flex flex-col transition-all duration-300 ease-in-out md:translate-x-0 overflow-hidden",
         isSidebarOpen ? "translate-x-0 shadow-2xl" : "-translate-x-[150%]"
       )}>
         <div className="p-6 border-b border-glass-border/50 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-black text-primary tracking-tight">Storage<span className="text-slate-800">Hub</span></h1>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mt-1">Admin Panel</p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mt-1">
+              {currentUser?.is_superuser ? 'Superuser Panel' : currentUser?.role === 'magazziniere' ? 'Magazziniere' : 'Admin Panel'}
+            </p>
           </div>
           <button 
             onClick={() => setIsSidebarOpen(false)}
-            className="md:hidden p-2 text-slate-400 hover:text-slate-600 bg-slate-100 rounded-full"
+            className="md:hidden p-2 text-slate-700 hover:text-slate-900 bg-slate-200 hover:bg-slate-300 border border-slate-300 shadow-sm rounded-full transition-all"
           >
             <X size={20} />
           </button>
@@ -146,9 +153,9 @@ export default function AdminLayout() {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 md:ml-[18rem] flex flex-col min-h-screen transition-all duration-300 w-full text-sm md:text-base">
+      <div className="flex-1 md:ml-[18rem] flex flex-col min-h-screen transition-all duration-300 w-full text-sm md:text-base relative z-10">
         {/* Top Header */}
-        <header className="h-16 md:h-24 sticky top-0 z-30 flex items-center justify-between px-4 md:px-8 bg-transparent">
+        <header className="h-16 md:h-24 sticky top-0 z-50 flex items-center justify-between px-4 md:px-8 bg-transparent">
           <div className="flex items-center gap-4 w-full md:w-auto">
             <button 
               onClick={() => setIsSidebarOpen(true)}
@@ -156,6 +163,17 @@ export default function AdminLayout() {
             >
               <Menu size={24} />
             </button>
+
+            {/* Elegant Top-Level Back Navigation Button */}
+            {location.pathname !== '/admin/dashboard' && location.pathname !== '/magazziniere/dashboard' && (
+              <button
+                onClick={() => navigate(-1)}
+                className="group flex items-center justify-center w-[42px] h-[42px] bg-white/40 hover:bg-white/80 border border-white/60 hover:border-primary/30 rounded-2xl transition-all shadow-sm backdrop-blur-md animate-in slide-in-from-left-2 shrink-0"
+                title="Torna Indietro / Esci"
+              >
+                <ArrowLeft className="w-5 h-5 text-slate-600 group-hover:text-primary group-hover:-translate-x-0.5 transition-all duration-300" />
+              </button>
+            )}
             
             <div className="relative w-full md:w-96 hidden md:block">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />

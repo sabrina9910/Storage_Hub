@@ -64,7 +64,7 @@ export default function LotManagerModal({ product, onClose }: { product: any, on
                  {product.name}
                </p>
              </div>
-             <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors">
+             <button onClick={onClose} className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-200 shadow-sm rounded-full transition-all">
                <X size={24} />
              </button>
           </div>
