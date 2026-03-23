@@ -70,98 +70,129 @@ export const apiServices = {
     localStorage.removeItem('refresh_token');
   },
   
+  // User Management
   getCurrentUser: () => fetchApi('/users/me/'),
-  
+  getUsers: () => fetchApi('/users/'),
+  createUser: (data: any) => fetchApi('/users/', { method: 'POST', body: JSON.stringify(data) }),
+  updateUser: (id: string | number, data: any) => fetchApi(`/users/${id}/`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteUser: (id: string | number) => fetchApi(`/users/${id}/`, { method: 'DELETE' }),
+  getLoginLogs: () => fetchApi('/users/login_logs/'),
+  getUserStats: () => fetchApi('/users/stats/'),
   updateProfile: (data: any) => fetchApi('/users/profile/', {
     method: 'PATCH',
     body: data instanceof FormData ? data : JSON.stringify(data),
   }),
-
   changePassword: (data: any) => fetchApi('/users/change_password/', {
     method: 'POST',
     body: JSON.stringify(data),
   }),
 
-  getUserStats: () => fetchApi('/users/stats/'),
-  
-  getUsers: () => fetchApi('/users/'),
+  // Categories
+  getCategories: () => fetchApi('/categories/'),
+  createCategory: (data: any) => fetchApi('/categories/', { method: 'POST', body: JSON.stringify(data) }),
+  updateCategory: (id: number | string, data: any) => fetchApi(`/categories/${id}/`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteCategory: (id: number | string) => fetchApi(`/categories/${id}/`, { method: 'DELETE' }),
 
-  updateUser: (id: string | number, data: any) => fetchApi(`/users/${id}/`, {
-    method: 'PATCH',
-    body: JSON.stringify(data),
-  }),
-
-  deleteUser: (id: string | number) => fetchApi(`/users/${id}/`, {
-    method: 'DELETE',
-  }),
-  
+  // Products & Inventory
   getProducts: (params?: any) => {
     let url = '/products/';
     if (typeof params === 'string') {
       url += params ? `?search=${encodeURIComponent(params)}` : '';
     } else if (params) {
       const q = new URLSearchParams();
-      if (params.search) q.append('search', params.search);
-      if (params.category && params.category !== 'ALL') q.append('category', params.category);
-      if (params.status && params.status !== 'ALL') q.append('status', params.status);
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== 'ALL') {
+          q.append(key, String(value));
+        }
+      });
       const str = q.toString();
       if (str) url += `?${str}`;
     }
     return fetchApi(url);
   },
   
-  getProductById: (id: string | number) => fetchApi(`/products/${id}/`),
-  
-  getProductMovements: (id: string | number) => fetchApi(`/movements/?product=${id}`),
-  
-  quarantineProduct: (data: any) => {
-    const id = typeof data === 'object' ? (data.product_id || data.id) : data;
-    return fetchApi(`/products/${id}/quarantine/`, {
+  exportCatalogXlsx: async (params?: any) => {
+    const q = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== 'ALL' && value !== '') {
+          q.append(key, String(value));
+        }
+      });
+    }
+    const qStr = q.toString();
+    const token = localStorage.getItem('access_token');
+    const response = await fetch(`${API_URL}/products/export-catalog/xlsx/${qStr ? `?${qStr}` : ''}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error('Download fallito');
+    return response.blob();
+  },
+
+  exportCatalogPdf: async (params?: any) => {
+    const q = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== 'ALL' && value !== '') {
+          q.append(key, String(value));
+        }
+      });
+    }
+    const qStr = q.toString();
+    const token = localStorage.getItem('access_token');
+    const response = await fetch(`${API_URL}/products/export-catalog/pdf/${qStr ? `?${qStr}` : ''}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error('Download fallito');
+    return response.blob();
+  },
+
+
+  importCatalogXlsx: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return fetchApi('/products/import-catalog/xlsx/', {
       method: 'POST',
-      body: typeof data === 'object' ? JSON.stringify(data) : undefined,
+      body: formData
     });
   },
-  
-  getCategories: () => fetchApi('/categories/'),
-  
-  createCategory: (data: any) => fetchApi('/categories/', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }),
 
-  updateCategory: (id: number | string, data: any) => fetchApi(`/categories/${id}/`, {
+  getProductById: (id: string | number) => fetchApi(`/products/${id}/`),
+  createProduct: (data: any) => fetchApi('/products/', { method: 'POST', body: JSON.stringify(data) }),
+  updateProduct: (id: number | string, data: any) => fetchApi(`/products/${id}/`, { method: 'PATCH', body: JSON.stringify(data) }),
+  updateProductStatus: (productId: number, isActive: boolean) => fetchApi(`/products/${productId}/`, {
     method: 'PATCH',
-    body: JSON.stringify(data),
+    body: JSON.stringify({ is_active: isActive }),
   }),
-
-  deleteCategory: (id: number | string) => fetchApi(`/categories/${id}/`, {
-    method: 'DELETE',
-  }),
-
-  createProduct: (data: any) => fetchApi('/products/', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }),
-
-  updateProduct: (id: number | string, data: any) => fetchApi(`/products/${id}/`, {
-    method: 'PATCH',
-    body: JSON.stringify(data),
-  }),
-
   getAlerts: () => fetchApi('/products/alerts/'),
+  getBlacklistedProducts: () => fetchApi('/products/blacklisted/'),
+  blacklistProduct: (id: number | string, data: any) => fetchApi(`/products/${id}/blacklist/`, { method: 'PATCH', body: JSON.stringify(data) }),
+  restoreProduct: (id: number | string) => fetchApi(`/products/${id}/restore/`, { method: 'PATCH' }),
   
-  getLots: () => fetchApi('/lots/'),
-  
-  createLot: (data: any) => fetchApi('/lots/', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }),
+  // Quarantine (Special Handlers)
+  quarantineProduct: (data: any) => {
+    const product_id = typeof data === 'object' ? (data.product_id || data.id) : data;
+    const reason = typeof data === 'object' ? (data.reason || '') : '';
+    return fetchApi('/movements/quarantine/', {
+      method: 'POST',
+      body: JSON.stringify({ product_id, reason }),
+    });
+  },
+  restoreQuarantineProduct: (productId: string | number) => {
+    return fetchApi(`/products/${productId}/restore-quarantine/`, {
+      method: 'PATCH',
+    });
+  },
 
+  // Lots
+  getLots: () => fetchApi('/lots/'),
+  createLot: (data: any) => fetchApi('/lots/', { method: 'POST', body: JSON.stringify(data) }),
   updateLotQuantity: (lotId: number, quantity: number) => fetchApi(`/lots/${lotId}/`, {
     method: 'PATCH',
     body: JSON.stringify({ current_quantity: quantity }),
   }),
 
+  // Movements
   getMovements: (params?: any) => {
     let url = '/movements/';
     if (typeof params === 'string') {
@@ -177,36 +208,19 @@ export const apiServices = {
     }
     return fetchApi(url);
   },
-  
-  createMovement: (data: any) => fetchApi('/movements/', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }),
-
-  getSuppliers: (search?: string) => fetchApi(search ? `/suppliers/?search=${encodeURIComponent(search)}` : '/suppliers/'),
-  
-  createSupplier: (data: any) => fetchApi('/suppliers/', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }),
-
-  updateProductStatus: (productId: number, isActive: boolean) => fetchApi(`/products/${productId}/`, {
-    method: 'PATCH',
-    body: JSON.stringify({ is_active: isActive }),
-  }),
-  
-  // Newly added missing methods:
-  getRecentAuditLogs: (limit?: number) => fetchApi(`/audit-log/${limit ? `?limit=${limit}` : ''}`),
-  askChatbot: (data: any) => fetchApi('/chatbot/ask/', { method: 'POST', body: JSON.stringify(data) }),
-  getAuditLogs: (paramsString?: string) => fetchApi(`/audit-log/${paramsString ? `?${paramsString}` : ''}`),
-  getBlacklistedProducts: () => fetchApi('/products/blacklisted/'),
-  restoreProduct: (id: number | string) => fetchApi(`/products/${id}/restore/`, { method: 'PATCH' }),
-  blacklistProduct: (id: number | string, data: any) => fetchApi(`/products/${id}/blacklist/`, { method: 'PATCH', body: JSON.stringify(data) }),
+  createMovement: (data: any) => fetchApi('/movements/', { method: 'POST', body: JSON.stringify(data) }),
+  getProductMovements: (id: string | number) => fetchApi(`/movements/?product=${id}`),
   addStock: (data: any) => fetchApi('/movements/add/', { method: 'POST', body: JSON.stringify(data) }),
   removeStock: (data: any) => fetchApi('/movements/remove/', { method: 'POST', body: JSON.stringify(data) }),
-  getProfile: () => fetchApi('/users/me/'),
+
+  // Suppliers
+  getSuppliers: (search?: string) => fetchApi(search ? `/suppliers/?search=${encodeURIComponent(search)}` : '/suppliers/'),
   getSupplier: (id: number | string) => fetchApi(`/suppliers/${id}/`),
+  createSupplier: (data: any) => fetchApi('/suppliers/', { method: 'POST', body: JSON.stringify(data) }),
   updateSupplier: (id: number | string, data: any) => fetchApi(`/suppliers/${id}/`, { method: 'PATCH', body: JSON.stringify(data) }),
-  getLoginLogs: () => fetchApi('/users/login_logs/'),
-  createUser: (data: any) => fetchApi('/users/', { method: 'POST', body: JSON.stringify(data) }),
+
+  // Logs & Tools
+  getAuditLogs: (paramsString?: string) => fetchApi(`/audit-log/${paramsString ? `?${paramsString}` : ''}`),
+  askChatbot: (data: any) => fetchApi('/chatbot/ask/', { method: 'POST', body: JSON.stringify(data) }),
 };
+

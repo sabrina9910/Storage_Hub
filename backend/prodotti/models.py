@@ -22,7 +22,9 @@ class Product(models.Model):
     min_stock_threshold = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
     is_quarantined = models.BooleanField(default=False)
-    quarantine_reason = models.TextField(blank=True)
+    quarantine_reason = models.TextField(blank=True, null=True)
+    quarantined_at = models.DateTimeField(null=True, blank=True)
+    quarantined_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='quarantined_products')
     is_blacklisted = models.BooleanField(default=False)
     blacklist_reason = models.TextField(blank=True)
 

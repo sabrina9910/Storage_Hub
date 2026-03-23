@@ -37,6 +37,10 @@ export default function ProductDetail() {
       setIsQuarantineModalOpen(false);
       toast.success('Prodotto spostato in quarantena con successo!');
       queryClient.invalidateQueries({ queryKey: ['product', id] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['movements'] });
+      queryClient.invalidateQueries({ queryKey: ['lots'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
     onError: () => {
       toast.error('Impossibile spostare in quarantena, riprova.');
@@ -51,6 +55,9 @@ export default function ProductDetail() {
       toast.success('Prodotto aggiunto alla blacklist!');
       queryClient.invalidateQueries({ queryKey: ['product', id] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['lots'] });
+      queryClient.invalidateQueries({ queryKey: ['movements'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
     onError: (err: any) => {
       toast.error(err.message || 'Errore durante la blacklist');

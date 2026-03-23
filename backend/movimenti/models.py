@@ -14,6 +14,7 @@ class StockMovement(models.Model):
         ('OUT', 'OUT'),
         ('RETURN', 'RETURN'),
         ('QUARANTINE', 'QUARANTINE'),
+        ('RESTORED', 'RESTORED'),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

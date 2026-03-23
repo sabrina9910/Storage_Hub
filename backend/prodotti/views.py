@@ -1,10 +1,10 @@
-from django.shortcuts import render
 from django.http import HttpResponse
 
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Sum, Q
+from django.db import transaction
 from django.utils import timezone
 from datetime import timedelta
 import csv
@@ -33,20 +33,20 @@ try:
 except ImportError:
     XML_AVAILABLE = False
 
-from core.permissions import IsMagazziniere
+from core.permissions import IsMagazziniere, IsAmministratore
 from .models import Product, ProductLot
 from .serializers import ProductSerializer, ProductLotSerializer
 from .filters import ProductFilter
 from auditlog.utils import create_audit_log
+from movimenti.models import StockMovement
 
 class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     filterset_class = ProductFilter
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve', 'alerts']:
+        if self.action in ['list', 'retrieve', 'alerts', 'restore_quarantine']:
             return [IsMagazziniere()]
-        from core.permissions import IsAmministratore
         return [IsAmministratore()]
 
     def get_queryset(self):
@@ -56,8 +56,8 @@ class ProductViewSet(viewsets.ModelViewSet):
         
         # Show all products for superuser
         if getattr(user, 'is_superuser', False):
-            return Product.objects.all().select_related('category').prefetch_related('suppliers')
-        return Product.objects.filter(is_active=True).select_related('category').prefetch_related('suppliers')
+            return Product.objects.all().select_related('category').prefetch_related('suppliers').distinct()
+        return Product.objects.filter(is_active=True).select_related('category').prefetch_related('suppliers').distinct()
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -258,9 +258,166 @@ class ProductViewSet(viewsets.ModelViewSet):
         doc.build(elements)
         return response
 
+    @action(detail=False, methods=['get'], url_path='export-catalog/xlsx')
+    def export_catalog_xlsx(self, request):
+        if not OPENPYXL_AVAILABLE:
+            return Response({'error': 'openpyxl non installata'}, status=500)
+        
+        products = self.filter_queryset(self.get_queryset())
+        
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="catalogo_prodotti.xlsx"'
+        
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = 'Catalogo Prodotti'
+        
+        headers = ['SKU', 'Nome', 'Categoria', 'Prezzo Unitario', 'Quantità Totale', 'Unità di Misura']
+        ws.append(headers)
+        
+        for cell in ws[1]:
+            cell.font = Font(bold=True)
+            cell.alignment = Alignment(horizontal='center')
+        
+        for product in products:
+            total_qty = product.lots.filter(is_active=True).aggregate(Sum('current_quantity'))['current_quantity__sum'] or 0
+            ws.append([
+                product.sku,
+                product.name,
+                product.category.name if product.category else 'N/D',
+                float(product.unit_price),
+                total_qty,
+                product.unit_of_measure
+            ])
+            
+        wb.save(response)
+        return response
+
+    @action(detail=False, methods=['get'], url_path='export-catalog/pdf')
+    def export_catalog_pdf(self, request):
+        if not REPORTLAB_AVAILABLE:
+            return Response({'error': 'reportlab non installata'}, status=500)
+            
+        products = self.filter_queryset(self.get_queryset())
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="catalogo_prodotti.pdf"'
+        
+        doc = SimpleDocTemplate(response, pagesize=letter)
+        elements = []
+        styles = getSampleStyleSheet()
+        
+        title = Paragraph("<b>Catalogo Prodotti - StorageHub</b>", styles['Title'])
+        elements.append(title)
+        elements.append(Spacer(1, 0.2*inch))
+        
+        data = [['SKU', 'Prodotto', 'Categoria', 'Prezzo', 'Stock']]
+        
+        for product in products:
+            total_qty = product.lots.filter(is_active=True).aggregate(Sum('current_quantity'))['current_quantity__sum'] or 0
+            data.append([
+                product.sku,
+                product.name[:30] + ('...' if len(product.name) > 30 else ''),
+                product.category.name if product.category else 'N/D',
+                f"€{product.unit_price}",
+                f"{total_qty} {product.unit_of_measure}"
+            ])
+            
+        table = Table(data, colWidths=[1.2*inch, 2.5*inch, 1.5*inch, 1*inch, 1*inch])
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0ea5e9')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('ALIGN', (3, 0), (4, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+        ]))
+        
+        elements.append(table)
+        doc.build(elements)
+        return response
+
+    @action(detail=False, methods=['post'], url_path='import-catalog/xlsx')
+    def import_catalog_xlsx(self, request):
+        if not OPENPYXL_AVAILABLE:
+            return Response({'error': 'openpyxl non installata'}, status=500)
+            
+        file = request.FILES.get('file')
+        if not file:
+            return Response({'error': 'Nessun file caricato'}, status=400)
+            
+        try:
+            wb = openpyxl.load_workbook(file)
+            ws = wb.active
+            rows = list(ws.iter_rows(values_only=True))
+            
+            if len(rows) < 2:
+                return Response({'error': 'Il file è troppo corto o vuoto'}, status=400)
+                
+            headers = [str(h).lower().strip() for h in rows[0]]
+            # nome, sku, categoria, prezzo, um, soglia
+            
+            import_count = 0
+            errors = []
+            
+            with transaction.atomic():
+                from .models import ProductCategory
+                for i, row in enumerate(rows[1:], start=2):
+                    row_data = dict(zip(headers, row))
+                    
+                    sku = str(row_data.get('sku', '') or '').strip()
+                    name = str(row_data.get('nome', '') or '').strip()
+                    cat_name = str(row_data.get('categoria', '') or '').strip()
+                    price_val = row_data.get('prezzo', 0)
+                    um = str(row_data.get('um', 'pz') or 'pz').strip()
+                    threshold_val = row_data.get('soglia', 10)
+                    
+                    if not sku or not name:
+                        errors.append(f"Riga {i}: SKU e Nome sono obbligatori")
+                        continue
+                        
+                    category = None
+                    if cat_name:
+                        category, _ = ProductCategory.objects.get_or_create(name=cat_name)
+                    
+                    try:
+                        price = float(price_val) if price_val is not None else 0.0
+                    except:
+                        price = 0.0
+                        
+                    try:
+                        threshold = int(threshold_val) if threshold_val is not None else 10
+                    except:
+                        threshold = 10
+                        
+                    product, created = Product.objects.update_or_create(
+                        sku=sku,
+                        defaults={
+                            'name': name,
+                            'category': category,
+                            'unit_price': price,
+                            'unit_of_measure': um,
+                            'min_stock_threshold': threshold,
+                            'owner': request.user,
+                            'is_active': True
+                        }
+                    )
+                    import_count += 1
+                    
+            return Response({
+                'message': f'Importati/Aggiornati {import_count} prodotti',
+                'errors': errors
+            })
+            
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+
+
     @action(detail=True, methods=['patch'], url_path='blacklist')
     def blacklist(self, request, pk=None):
-        from core.permissions import IsAmministratore
         self.permission_classes = [IsAmministratore]
         self.check_permissions(request)
         
@@ -279,7 +436,6 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['patch'], url_path='restore')
     def restore(self, request, pk=None):
-        from core.permissions import IsAmministratore
         self.permission_classes = [IsAmministratore]
         self.check_permissions(request)
         
@@ -297,12 +453,43 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='blacklisted')
     def blacklisted(self, request):
-        from core.permissions import IsAmministratore
         self.permission_classes = [IsAmministratore]
         self.check_permissions(request)
         
         blacklisted_products = Product.objects.filter(is_blacklisted=True)
         serializer = self.get_serializer(blacklisted_products, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['patch'], url_path='restore-quarantine')
+    def restore_quarantine(self, request, pk=None):
+        product = self.get_object()
+        
+        with transaction.atomic():
+            product.is_quarantined = False
+            product.quarantine_reason = ''
+            product.quarantined_at = None
+            product.quarantined_by = None
+            product.save()
+            
+            # Calculate total quantity
+            total_qty = product.lots.filter(is_active=True).aggregate(Sum('current_quantity'))['current_quantity__sum'] or 0
+            
+            user = request.user
+            StockMovement.objects.create(
+                product=product,
+                user=user,
+                user_full_name=f"{user.first_name} {user.last_name}".strip() or user.email,
+                user_email=user.email,
+                user_role=user.role if hasattr(user, 'role') else 'unknown',
+                movement_type='RESTORED',
+                quantity=total_qty,
+                notes="Ripristinato dalla quarantena"
+            )
+            
+            # Create audit log
+            create_audit_log(user, 'RESTORED', product, total_qty, "Restore from quarantine")
+            
+        serializer = self.get_serializer(product)
         return Response(serializer.data)
 
 class ProductLotViewSet(viewsets.ModelViewSet):

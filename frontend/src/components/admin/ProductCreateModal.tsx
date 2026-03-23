@@ -33,6 +33,7 @@ export default function ProductCreateModal({ onClose, productToEdit }: ProductCr
     mutationFn: (data: any) => apiServices.createProduct(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       toast.success('Prodotto creato con successo!');
       onClose();
     },
@@ -45,6 +46,7 @@ export default function ProductCreateModal({ onClose, productToEdit }: ProductCr
     mutationFn: (data: any) => apiServices.updateProduct(productToEdit.id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       toast.success('Prodotto aggiornato con successo!');
       onClose();
     },

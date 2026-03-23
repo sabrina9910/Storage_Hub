@@ -22,7 +22,7 @@ export default function Profile() {
 
   const { data: userData, isLoading } = useQuery({
     queryKey: ['profile'],
-    queryFn: apiServices.getProfile,
+    queryFn: apiServices.getCurrentUser,
   });
   const user: any = userData;
 

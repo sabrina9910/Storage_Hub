@@ -3,14 +3,14 @@ import { apiServices } from '@/lib/api';
 import KPIGrid from '@/components/admin/KPIGrid';
 import ActivityChart from '@/components/admin/ActivityChart';
 import ExpiringLotsWidget from '@/components/admin/ExpiringLotsWidget';
+import QuarantineWidget from '@/components/admin/QuarantineWidget';
 import { Loader2 } from 'lucide-react';
 
 export default function DashboardAdmin() {
   const { data: products, isLoading: pLoading } = useQuery({ queryKey:['products'], queryFn: apiServices.getProducts });
   const { data: lots, isLoading: lLoading } = useQuery({ queryKey:['lots'], queryFn: apiServices.getLots });
-  const { data: movements, isLoading: mLoading } = useQuery({ queryKey:['movements'], queryFn: apiServices.getMovements });
 
-  if (pLoading || lLoading || mLoading) {
+  if (pLoading || lLoading) {
     return (
       <div className="flex items-center justify-center h-[50vh]">
         <Loader2 className="w-12 h-12 text-primary animate-spin" />
@@ -21,7 +21,6 @@ export default function DashboardAdmin() {
   // Calculate KPIs
   const safeProducts = Array.isArray(products?.results || products) ? (products?.results || products) : [];
   const safeLots = Array.isArray(lots?.results || lots) ? (lots?.results || lots) : [];
-  const safeMovements = Array.isArray(movements?.results || movements) ? (movements?.results || movements) : [];
 
   let inventoryValue = 0;
   let activeProducts = safeProducts.length;
@@ -44,14 +43,8 @@ export default function DashboardAdmin() {
     }
   });
 
-  // Calculate quarantined items based on movements
-  const quarantinedLotsSet = new Set();
-  safeMovements.forEach((m:any) => {
-    if (m.movement_type === 'QUARANTINE') {
-        quarantinedLotsSet.add(m.lot);
-    }
-  });
-  quarantineItems = quarantinedLotsSet.size;
+  // Calculate quarantined items based on product status
+  quarantineItems = safeProducts.filter((p: any) => p.is_quarantined).length;
 
   // Calculate Chart Data (Mocking past 7 days based on today)
   const today = new Date();
@@ -80,8 +73,9 @@ export default function DashboardAdmin() {
       <KPIGrid data={{ inventoryValue, activeProducts, lowStockAlerts, quarantineItems }} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-6">
           <ActivityChart data={chartData} />
+          <QuarantineWidget />
         </div>
         <div>
           <ExpiringLotsWidget lots={enrichedLots} />

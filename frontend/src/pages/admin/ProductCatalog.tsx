@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiServices } from '@/lib/api';
-import { PackageOpen, Edit2, Layers, Trash2, CheckCircle2, ChevronDown, ChevronUp, Thermometer, Info, Plus, X } from 'lucide-react';
+import { PackageOpen, Edit2, Layers, Trash2, CheckCircle2, ChevronDown, ChevronUp, Thermometer, Info, Plus, X, FileSpreadsheet, FileText, FileUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'react-hot-toast';
 import LotManagerModal from '@/components/admin/LotManagerModal';
@@ -44,10 +44,46 @@ export default function ProductCatalog() {
     mutationFn: ({ id, isActive }: { id: number, isActive: boolean }) => apiServices.updateProductStatus(id, isActive),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       toast.success('Stato prodotto aggiornato');
     },
     onError: () => toast.error('Errore durante l\'aggiornamento dello stato')
   });
+
+  const importMutation = useMutation({
+    mutationFn: (file: File) => apiServices.importCatalogXlsx(file),
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      toast.success(data.message || 'Importazione completata!');
+      if (data.errors?.length > 0) {
+        console.warn('Errori durante importazione:', data.errors);
+        toast(data.errors[0], { icon: '⚠️' });
+      }
+    },
+    onError: (err: any) => toast.error(err.message || 'Errore importazione')
+  });
+
+  const handleExport = async (format: 'xlsx' | 'pdf') => {
+    try {
+      toast.loading('Generazione file...', { id: 'export' });
+      const blob = format === 'xlsx' 
+        ? await apiServices.exportCatalogXlsx(queryParams)
+        : await apiServices.exportCatalogPdf(queryParams);
+      
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `catalogo_prodotti.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Download avviato!', { id: 'export' });
+    } catch (error) {
+      toast.error('Errore durante il download', { id: 'export' });
+    }
+  };
+
 
   const handleSoftDelete = (product: any, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -153,15 +189,47 @@ export default function ProductCatalog() {
             onReset={() => setFilters({ category: 'ALL', status: 'ALL' })}
           />
 
+          {/* New Export/Import Buttons */}
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => handleExport('xlsx')}
+              className="p-3 bg-white/60 hover:bg-white/80 border border-white/50 text-emerald-600 rounded-2xl shadow-sm transition-all active:scale-95"
+              title="Esporta Catalogo XLSX"
+            >
+              <FileSpreadsheet size={20} />
+            </button>
+            <button 
+              onClick={() => handleExport('pdf')}
+              className="p-3 bg-white/60 hover:bg-white/80 border border-white/50 text-rose-600 rounded-2xl shadow-sm transition-all active:scale-95"
+              title="Esporta Catalogo PDF"
+            >
+              <FileText size={20} />
+            </button>
+            <label className="p-3 bg-white/60 hover:bg-white/80 border border-white/50 text-indigo-600 rounded-2xl shadow-sm cursor-pointer transition-all active:scale-95" title="Importa da XLSX">
+              <FileUp size={20} />
+              <input 
+                type="file" 
+                className="hidden" 
+                accept=".xlsx" 
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) importMutation.mutate(file);
+                  e.target.value = '';
+                }} 
+              />
+            </label>
+          </div>
+
           <button 
             onClick={() => setIsCreatingProduct(true)}
             className="group relative overflow-hidden bg-gradient-to-br from-primary to-indigo-600 border border-white/30 hover:shadow-[0_0_20px_rgba(79,70,229,0.4)] text-white px-6 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all duration-300 active:scale-95 shrink-0 h-[46px]"
           >
             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
-            <Plus size={20} className="relative z-10" /> <span className="hidden sm:inline relative z-10 drop-shadow-md">Crea Prodotto</span>
+            <Plus size={20} className="relative z-10" /> <span className="hidden lg:inline relative z-10 drop-shadow-md">Crea Prodotto</span>
           </button>
         </div>
       </div>
+
 
       <div className="glass-card overflow-hidden">
         <div className="w-full">
