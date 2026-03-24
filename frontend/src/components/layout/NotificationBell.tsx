@@ -37,7 +37,7 @@ export default function NotificationBell() {
   ];
 
   // Count only those not in seenIds
-  const unseenCount = currentAlerts.filter(a => !seenIds.includes(a.uid)).length;
+  const unseenCount = currentAlerts.filter(a => a.uid && !seenIds.includes(a.uid)).length;
 
   useEffect(() => {
     if (isOpen && currentAlerts.length > 0) {

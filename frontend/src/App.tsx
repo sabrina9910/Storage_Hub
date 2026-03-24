@@ -33,7 +33,7 @@ import Movimenti from './pages/admin/Movimenti';
 import Blacklist from './pages/admin/Blacklist';
 import AuditLog from './pages/admin/AuditLog';
 
-const queryClient = new QueryClient();
+import { queryClient } from './lib/queryClient';
 
 function App() {
   return (

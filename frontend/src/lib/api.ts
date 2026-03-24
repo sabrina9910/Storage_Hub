@@ -1,4 +1,5 @@
 // Simple Fetch wrapper for API calls with JWT handling
+import { queryClient } from './queryClient';
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
 
 function getAuthHeaders(): Record<string, string> {
@@ -68,6 +69,8 @@ export const apiServices = {
   logout: () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    queryClient.clear();
+    window.location.href = '/login';
   },
   
   // User Management
