@@ -79,8 +79,10 @@ export default function Profile() {
   if (isLoading) return <div className="p-8 text-slate-500">Caricamento...</div>;
   if (!user) return null;
 
-  const roleName = user.is_superuser ? 'Superuser' : user.role === 'amministratore' ? 'Amministratore' : 'Magazziniere';
-
+  const roleName = user.is_superuser || user.role === 'amministratore' ? 'Amministratore' : 'Magazziniere';
+  const roleColor = user.is_superuser || user.role === 'amministratore'
+    ? 'text-rose-600 bg-rose-100 border-rose-200' 
+    : 'text-emerald-600 bg-emerald-100 border-emerald-200';
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center gap-4 mb-8">

@@ -99,20 +99,12 @@ export default function Login() {
 
         <div className="pt-6 border-t border-slate-100 flex flex-col gap-3">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Accesso Rapido (Ambiente di Test)</p>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={() => handleQuickLogin('superadmin@storagehub.com', 'super123')}
-              className="text-xs font-medium py-2 px-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 transition-colors border border-purple-200 shadow-sm disabled:opacity-50"
-            >
-              {isLoading ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : 'Super Admin'}
-            </button>
+          <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
               disabled={isLoading}
               onClick={() => handleQuickLogin('admin@storagehub.com', 'admin123')}
-              className="text-xs font-medium py-2 px-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 transition-colors border border-blue-200 shadow-sm disabled:opacity-50"
+              className="text-xs font-bold py-2.5 px-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 transition-colors border border-blue-200 shadow-sm disabled:opacity-50"
             >
               {isLoading ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : 'Admin'}
             </button>
@@ -120,7 +112,7 @@ export default function Login() {
               type="button"
               disabled={isLoading}
               onClick={() => handleQuickLogin('magazziniere@storagehub.com', 'magazzino123')}
-              className="text-xs font-medium py-2 px-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 transition-colors border border-emerald-200 shadow-sm disabled:opacity-50"
+              className="text-xs font-bold py-2.5 px-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 transition-colors border border-emerald-200 shadow-sm disabled:opacity-50"
             >
               {isLoading ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : 'Magazziniere'}
             </button>
