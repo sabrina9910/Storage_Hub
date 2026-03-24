@@ -162,12 +162,10 @@ export default function UserProfile() {
       });
   }
 
-  const roleName = currentUser.is_superuser ? 'Superuser' : currentUser.role === 'amministratore' ? 'Amministratore' : 'Magazziniere';
-  const roleColor = currentUser.is_superuser 
-    ? 'text-purple-600 bg-purple-100 border-purple-200' 
-    : currentUser.role === 'amministratore' 
-      ? 'text-blue-600 bg-blue-100 border-blue-200' 
-      : 'text-emerald-600 bg-emerald-100 border-emerald-200';
+  const roleName = currentUser.is_superuser || currentUser.role === 'amministratore' ? 'Amministratore' : 'Magazziniere';
+  const roleColor = currentUser.is_superuser || currentUser.role === 'amministratore'
+    ? 'bg-rose-100 text-rose-700'
+    : 'bg-emerald-100 text-emerald-700';
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto space-y-8">

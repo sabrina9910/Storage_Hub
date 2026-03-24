@@ -205,7 +205,7 @@ export default function AdminLayout() {
                   }
                 </p>
                 <p className="text-xs text-slate-500 font-medium uppercase tracking-widest">
-                  {currentUser?.is_superuser ? 'Superuser' : currentUser?.role === 'magazziniere' ? 'Magazziniere' : 'Amministratore'}
+                  {currentUser?.is_superuser || currentUser?.role === 'amministratore' ? 'Amministratore' : 'Magazziniere'}
                 </p>
               </div>
               <div className="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold border-2 border-white shadow-md uppercase group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all relative">

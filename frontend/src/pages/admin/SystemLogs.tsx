@@ -187,15 +187,13 @@ export default function SystemLogs() {
                         <td className="p-4">
                           <span
                             className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${
-                              user.is_superuser
-                                ? 'bg-purple-100 text-purple-600'
-                                : user.role === 'amministratore'
-                                ? 'bg-blue-100 text-blue-600'
-                                : 'bg-emerald-100 text-emerald-600'
+                              user.is_superuser || user.role === 'amministratore'
+                                ? 'bg-rose-100 text-rose-700'
+                                : 'bg-slate-100 text-slate-700'
                             }`}
                           >
                             <Shield size={12} />
-                            {user.is_superuser ? 'Superuser' : user.role === 'amministratore' ? 'Admin' : 'Magazziniere'}
+                            {user.is_superuser || user.role === 'amministratore' ? 'Amministratore' : 'Magazziniere'}
                           </span>
                         </td>
                         <td className="p-4">
