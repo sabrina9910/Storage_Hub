@@ -3,7 +3,6 @@ import { apiServices } from '@/lib/api';
 import KPIGrid from '@/components/admin/KPIGrid';
 import ActivityChart from '@/components/admin/ActivityChart';
 import ExpiringLotsWidget from '@/components/admin/ExpiringLotsWidget';
-import QuarantineWidget from '@/components/admin/QuarantineWidget';
 import { Loader2 } from 'lucide-react';
 
 export default function DashboardAdmin() {
@@ -75,7 +74,6 @@ export default function DashboardAdmin() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <ActivityChart data={chartData} />
-          <QuarantineWidget />
         </div>
         <div>
           <ExpiringLotsWidget lots={enrichedLots} />
