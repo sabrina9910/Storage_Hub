@@ -7,3 +7,10 @@ Il problema era dovuto a una discrepanza tra il frontend e il backend:
 Ho corretto il metodo \`quarantineProduct\` nel file \`frontend/src/lib/api.ts\`. Ora il frontend comunicherà correttamente con il backend, permettendo l'inserimento in quarantena attraverso i componenti e le aree dedicate.
 
 Puoi provare nuovamente a mettere il prodotto in quarantena!
+
+***
+
+Correzione bug critico legato al logout
+rimossa tabella grande prodotti in quarantena 
+Grafico più pulito e sistemato
+Unito i ruoli di super admin e admin/amministratore

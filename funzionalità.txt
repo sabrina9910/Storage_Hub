@@ -1,30 +1,30 @@
-1. Possibiltà di aprire dalla dashboard le card: valore inventario, prodotti attivi, quarantena e allarmi scorte; ILARIA (FATTO)
-2. Attivare pulsante visualizza tutti i lotti a rischio; ILARIA FATTO
-3. Creare una scheda fornitori più approfondita;   SABRINA  
-4. Creare profilo utente / inserire cambio email e pass; SABRINA
-5. Controllare dashboard worker e manager; SABRINA buttare idee
-6. Possibilità di scaricare un file excel con il riepilogo del prodotto (file: csv xml(sabrina lo ricorda) e pdf); SABRINA
-7. Possibilità di inserire un prodotto in quarantena; ILARIA FATTO
-8. Possibilità di inserire un prodotto in blacklist; SABRINA fare una blacklist (bottone dove scrivi elimina prodotto) o altra pagina che si apre con questi file;
+1. Possibiltà di aprire dalla dashboard le card: valore inventario, prodotti attivi, quarantena e allarmi scorte; 
+2. Attivare pulsante visualizza tutti i lotti a rischio; 
+3. Creare una scheda fornitori più approfondita;    
+4. Creare profilo utente / inserire cambio email e pass; 
+5. Controllare dashboard worker e manager; buttare idee
+6. Possibilità di scaricare un file excel con il riepilogo del prodotto (file: csv xml(sabrina lo ricorda) e pdf); 
+7. Possibilità di inserire un prodotto in quarantena; 
+8. Possibilità di inserire un prodotto in blacklist; fare una blacklist (bottone dove scrivi elimina prodotto) o altra pagina che si apre con questi file;
 9. Possibilità di scaricare un file excel riepilogo dei prodotti per singolo fornitore e posisbilità di 
-scaricare un catalogo con tutto quello che può offrire l'azienda; SABRINA
+scaricare un catalogo con tutto quello che può offrire l'azienda;
 10. Creare una scheda per singolo prodotto con il riepilogo dei movimenti e tutte le cartetteristiche del 
-prodotto stesso (tipo ecommerce per i dettagli); ILARIA FATTO
-11. funzionalità admin, worker e manager: nella dashboard un bottone ordini per fare add e remove di prodotti; SABRINA
-12. Sistemiamo worker e manager seguendo la consegna di ema (NOMI); ILARIA FATTO
-13. Profilo: inserire change name;RIVEDERE 
-14. possibilità di aggiungere più magazzinieri e admin; SABRINA
-15. attivare il tasto cerca; ILARIA FATTO
-16. Controllare gli alert e le notifiche renderlo modificabile; MANU
-17. sistemare filtri; ILARIA FATTO
-18. nome di chi fa il movimento di email, e tutto quello che è necessario RUOLO; SABRINA 
-19. anagrafica fatta bene del singolo manager e magazziniere; ILARIA FATTO
-20. ├── alert_report/             # APP 6: ALERT E MONITORAGGIO (Requisito Obbligatorio) MANUELA
+prodotto stesso (tipo ecommerce per i dettagli); 
+11. funzionalità admin, worker e manager: nella dashboard un bottone ordini per fare add e remove di prodotti; 
+12. Sistemiamo worker e manager seguendo la consegna di ema (NOMI); 
+13. Profilo: inserire change name;
+14. possibilità di aggiungere più magazzinieri e admin; 
+15. attivare il tasto cerca; 
+16. Controllare gli alert e le notifiche renderlo modificabile; 
+17. sistemare filtri; 
+18. nome di chi fa il movimento di email, e tutto quello che è necessario RUOLO; 
+19. anagrafica fatta bene del singolo manager e magazziniere; 
+20. ├── alert_report/             # APP 6: ALERT E MONITORAGGIO (Requisito Obbligatorio) 
 │   ├── services.py           # Logica complessa: calcola la giacenza vera sommando tutti i lotti attivi
 │   ├── views.py              # "Endpoint dedicato che restituisca l'elenco dei prodotti sotto soglia"
 │   └── urls.py               # /api/alerts/low-stock/, /api/reports/inventory-value/
 │
-└── ai_services/              # APP 7: INTEGRAZIONE AI (Requisito Obbligatorio + Bonus Multi-Provider) MANUELA
+└── ai_services/              # APP 7: INTEGRAZIONE AI (Requisito Obbligatorio + Bonus Multi-Provider) 
     ├── providers/            # Pattern Architetturale per il Bonus Multi-Provider
     │   ├── base.py           # Interfaccia base astratta
     │   ├── gemini.py         # Logica di connessione alle API di Google Gemini
@@ -96,3 +96,19 @@ backend/
     ├── services.py           # Raccoglie i dati dal DB (storico, anomalie) per iniettarli nel prompt
     ├── views.py              # Endpoint per invocare l'AI (es. genera report, chat assistente)
     └── urls.py               # /api/ai/generate-report/, /api/ai/chat/
+
+
+
+
+    Pagina prodotti attivi, abbinare categoria, fornitore e mini Stock
+    pagina inventario, errore di caricamento valore inventario
+    errore nel caricamento degli allarmi
+    Errore nel caricamento dei dati di quarantena
+    non si fa creare le categorie
+    quando provo a salvare le modifiche del profilo non me le salva
+    i prodotti devono essere tutti modificabili
+    si deve avere la possibilità di uscire da tutte le pagine
+    gli ambienti devono essere modificabili e non standard
+    Frontend sistemato e ottimizzato
+    modifica della dicitura admin pannello
+    implementazione di tre profili 
