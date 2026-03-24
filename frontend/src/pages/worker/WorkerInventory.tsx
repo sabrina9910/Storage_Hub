@@ -53,17 +53,17 @@ export default function WorkerInventory() {
                 key={p.id}
                 className="p-4 glass-card bg-white/60 hover:bg-white transition-all flex justify-between items-center group animate-in slide-in-from-bottom-4 duration-500"
               >
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 flex-1 min-w-0 pr-4">
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
                     <Package size={24} />
                   </div>
-                  <div>
-                    <h3 className="font-bold text-slate-800 line-clamp-1">{p.name}</h3>
-                    <p className="text-xs font-mono text-slate-500 mt-0.5 bg-slate-100 w-fit px-1.5 py-0.5 rounded">{p.sku}</p>
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-slate-800 truncate">{p.name}</h3>
+                    <p className="text-xs font-mono text-slate-500 mt-0.5 bg-slate-100 w-fit px-1.5 py-0.5 rounded truncate">{p.sku}</p>
                   </div>
                 </div>
                 
-                <div className="text-right">
+                <div className="text-right shrink-0">
                   <p className="text-2xl font-black text-primary leading-none">{p.unit_price}</p>
                   <p className="text-[10px] uppercase font-bold text-slate-400 mt-1">Q.tà Tot.</p>
                 </div>

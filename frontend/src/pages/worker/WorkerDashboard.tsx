@@ -4,7 +4,6 @@ import { apiServices } from '@/lib/api';
 import { Clock, Activity, ArrowLeftRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import QuarantineWidget from '@/components/admin/QuarantineWidget';
 
 export default function WorkerDashboard() {
   const [time, setTime] = useState(new Date());
@@ -33,7 +32,7 @@ export default function WorkerDashboard() {
       <div className="glass-card p-8 rounded-3xl flex flex-col xl:flex-row items-center justify-between gap-8 bg-gradient-to-br from-white/80 to-white/40">
         <div>
           <h1 className="text-4xl font-black text-slate-800 tracking-tight mb-2">
-            Bentornato, {user?.email?.split('@')[0] || 'Operatore'}!
+            Bentornato, {user?.first_name ? `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}` : (user?.username || user?.email?.split('@')[0] || 'Operatore')}!
           </h1>
           <p className="text-lg text-slate-600 font-medium">
             Il tuo spazio di lavoro operativo
@@ -89,9 +88,11 @@ export default function WorkerDashboard() {
                         {format(new Date(m.timestamp), 'HH:mm')}
                       </div>
                     </td>
-                    <td className="py-4 pr-4">
-                      <div className="font-bold text-slate-800 text-base">{m.lot_details?.product_name || `Lotto ${m.lot}`}</div>
-                      <div className="text-xs text-slate-500 font-mono mt-1 bg-white/50 inline-block px-1.5 rounded">{m.lot_details?.lot_number || `ID ${m.lot.substring(0,8)}`}</div>
+                    <td className="py-4 pr-4 max-w-[200px]">
+                      <div className="font-bold text-slate-800 text-base truncate" title={m.product_name || `Lotto ${m.lot}`}>{m.product_name || `Lotto ${m.lot}`}</div>
+                      <div className="text-xs text-slate-500 font-mono mt-1 bg-white/50 inline-block px-1.5 rounded truncate max-w-full">
+                        {m.product_sku ? `SKU: ${m.product_sku}` : ''} {m.lot ? `(Lot: ${String(m.lot).substring(0,8)})` : ''}
+                      </div>
                     </td>
                     <td className="py-4 pr-4">
                       <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider shadow-sm ${
@@ -129,9 +130,6 @@ export default function WorkerDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
-        <QuarantineWidget />
-      </div>
     </div>
   );
 }

@@ -155,14 +155,14 @@ export default function DesktopMovementWizard() {
                         : "bg-white/60 hover:bg-white border-slate-200"
                     )}
                   >
-                    <div>
-                      <p className={cn("font-bold text-base", selectedProduct?.id === p.id ? "text-white" : "text-slate-800")}>{p.name}</p>
+                    <div className="flex-1 min-w-0 pr-4">
+                      <p className={cn("font-bold text-base truncate", selectedProduct?.id === p.id ? "text-white" : "text-slate-800")}>{p.name}</p>
                       <p className={cn(
-                        "text-xs font-mono mt-1 w-fit px-1.5 py-0.5 rounded font-medium",
+                        "text-xs font-mono mt-1 w-fit px-1.5 py-0.5 rounded font-medium truncate",
                          selectedProduct?.id === p.id ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
                       )}>{p.sku}</p>
                     </div>
-                    {selectedProduct?.id === p.id && <CheckCircle2 size={20} className="text-white" />}
+                    {selectedProduct?.id === p.id && <CheckCircle2 size={20} className="text-white shrink-0" />}
                   </button>
                 ))
               )}
