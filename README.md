@@ -80,41 +80,6 @@ Il sistema richiede un file `.env` all'interno della cartella `backend/`. Crealo
 
 ---
 
-## 🗄️ Architettura del Database (Diagramma ER)
-
-Il database o schema relazionale è strutturato rigorosamente per garantire l'integrità dei dati storici delle movimentazioni.
-
-Snippet di codice
-
-erDiagram
-    USERS ||--o{ MOVEMENTS : "registra"
-    PRODUCTS ||--o{ MOVEMENTS : "subisce"
-    CATEGORIES ||--|{ PRODUCTS : "classifica"
-    SUPPLIERS }|--|{ PRODUCTS : "fornisce"
-
-    USERS {
-        int id PK
-        string username
-        string role "Admin | Magazziniere"
-    }
-    PRODUCTS {
-        int id PK
-        string sku
-        float prezzo
-        int soglia_minima
-        int category_id FK
-    }
-    MOVEMENTS {
-        int id PK
-        string tipo "IN | OUT"
-        int quantita
-        datetime data_operazione
-        int product_id FK
-        int user_id FK
-    }
-
----
-
 ## 🔌 Documentazione API (Endpoints Base)
 
 L'architettura RESTful è protetta da standard JWT. Inserire il bearer token nell'header delle richieste protette: `Authorization: Bearer <token>`.
