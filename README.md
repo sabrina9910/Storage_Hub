@@ -84,7 +84,8 @@ Il sistema richiede un file `.env` all'interno della cartella `backend/`. Crealo
 
 Il database o schema relazionale è strutturato rigorosamente per garantire l'integrità dei dati storici delle movimentazioni.
 
-```mermaid
+Snippet di codice
+
 erDiagram
     USERS ||--o{ MOVEMENTS : "registra"
     PRODUCTS ||--o{ MOVEMENTS : "subisce"
@@ -111,7 +112,6 @@ erDiagram
         int product_id FK
         int user_id FK
     }
-```
 
 ---
 
