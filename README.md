@@ -173,14 +173,3 @@ L'architettura RESTful è protetta da standard JWT. Inserire il bearer token nel
 </details>
 
 ---
-
-## ☁️ Architettura Cloud (Produzione AWS Layer 3)
-
-Il progetto è predisposto per un ambiente di produzione scalabile "Full Fault Tolerant" (High Availability e Zero Data Loss) su infrastruttura AWS.
-
-* **Storage & CDN:** Il Frontend React/Vite in forma di Single Page Application (SPA) è ospitato atomicamente su **Amazon S3** ed accelerato globalmente tramite **Amazon CloudFront** per garantire latenza minima, difesa WAF nativa contro gli attacchi, e nessun fallimento del server web.
-* **Compute (Scale-Out Backend):** L'API Django è containerizzata/servita da un **Auto Scaling Group** e smistata da un **Application Load Balancer (ALB)**. Le istanze lavorano in subnets private su doppie Availability Zones (*AZ-a*, *AZ-b*) distribuite per assicurare il *failover* immediato in caso di disastro locale. 
-* **Database Resiliente:** Le transazioni aziendali sono gestite da un'istanza relazionale **Amazon RDS PostgreSQL** in deploy **Multi-AZ**, garantendo backup continui e una Replica Server Standby (Replica Sincrona) nascosta e auto-promuovibile in caso di down primario improvviso.
-
-> 📖 **Per i dettagli architetturali, stime costi operativi e diagramma illustrativo:**
-> Consulta il file `AWS_Architecture_Documentation.md` e la tavola del flusso `AWS_Architecture_Diagram.png` (generata con AWS Native Icons e Python-Diagrams) inclusi in questa repository.
