@@ -18,6 +18,7 @@ export default function KPIGrid({ data }: { data: KPIData }) {
       gradId: "grad-emerald",
       bgClass: "from-emerald-500/10 to-emerald-500/5",
       borderClass: "border-emerald-500/20",
+      dotClass: "bg-emerald-500",
       link: "/admin/inventory-value",
       hoverClass: "hover:shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:border-emerald-500/50"
     },
@@ -28,6 +29,7 @@ export default function KPIGrid({ data }: { data: KPIData }) {
       gradId: "grad-blue",
       bgClass: "from-blue-500/10 to-blue-500/5",
       borderClass: "border-blue-500/20",
+      dotClass: "bg-blue-500",
       link: "/admin/active-products",
       hoverClass: "hover:shadow-[0_0_20px_rgba(59,130,246,0.2)] hover:border-blue-500/50"
     },
@@ -38,6 +40,7 @@ export default function KPIGrid({ data }: { data: KPIData }) {
       gradId: "grad-amber",
       bgClass: "from-amber-500/10 to-amber-500/5",
       borderClass: "border-amber-500/20",
+      dotClass: "bg-amber-500",
       link: "/admin/low-stock-alerts",
       hoverClass: "hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:border-amber-500/50"
     },
@@ -48,6 +51,7 @@ export default function KPIGrid({ data }: { data: KPIData }) {
       gradId: "grad-rose",
       bgClass: "from-rose-500/10 to-rose-500/5",
       borderClass: "border-rose-500/20",
+      dotClass: "bg-rose-500",
       link: "/admin/quarantine",
       hoverClass: "hover:shadow-[0_0_20px_rgba(225,29,72,0.2)] hover:border-rose-500/50"
     }
@@ -85,22 +89,25 @@ export default function KPIGrid({ data }: { data: KPIData }) {
             to={kpi.link}
             key={index} 
             className={cn(
-              "glass-card p-6 flex items-start justify-between border-t-4 hover:-translate-y-1 transition-all duration-300 block cursor-pointer",
+              "glass-card p-6 flex flex-col items-start gap-8 border-t-4 hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full justify-between",
               kpi.borderClass,
               kpi.hoverClass
             )}
           >
-            <div>
-              <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
-                <span className={cn("w-2 h-2 rounded-full", `bg-${kpi.gradId.replace('grad-', '')}-500`)}></span>
+            <div className="w-full">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                <span className={cn("w-2 h-2 rounded-full", kpi.dotClass)}></span>
                 {kpi.title}
               </p>
-              <h3 className="text-4xl font-black text-slate-800 tracking-tighter drop-shadow-sm">
+              <h3 className="text-4xl font-black text-slate-800 tracking-tighter drop-shadow-sm leading-none">
                 {kpi.value}
               </h3>
             </div>
-            <div className={cn("p-4 rounded-2xl flex items-center justify-center bg-gradient-to-br shadow-inner border border-white/50", kpi.bgClass)}>
-              <Icon size={32} strokeWidth={2} color={`url(#${kpi.gradId})`} />
+            
+            <div className="w-full flex justify-end">
+              <div className={cn("p-4 rounded-2xl flex items-center justify-center bg-gradient-to-br shadow-inner border border-white/50", kpi.bgClass)}>
+                <Icon size={32} strokeWidth={2.5} color={`url(#${kpi.gradId})`} />
+              </div>
             </div>
           </Link>
         );
